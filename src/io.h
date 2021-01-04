@@ -9,11 +9,4 @@
 
 typedef uint16_t port16;
 
-extern const port16 CRT_ADD_REG;
-extern const port16 CRT_DATA_REG;
-extern const port16 MISC_OUT_REG_RD;
-extern const port16 MISC_OUT_REG_WR;
-extern const port16 ATTR_ADD_REG;
-extern const port16 ATTR_DATA_REG;
-
 #endif
