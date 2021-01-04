@@ -1,4 +1,4 @@
-SRC_DIR = ./kernel/
+SRC_DIR = ./src/
 BIN_DIR = ./bin/
 OBJ_DIR = ./obj/
 DUMP_DIR = ./dumps/
@@ -6,20 +6,19 @@ DUMP_DIR = ./dumps/
 
 AS = $$HOME/workspace/operating-systems/osproj/i686-gcc/bin/i686-elf-as
 AS_FLAGS = -O0 -gdwarf-4
-AS_FILES = $(SRC_DIR)boot.S
+AS_FILES = boot
 
 LD_FLAGS = -T linker.ld -ffreestanding -O0 -gdwarf-4 -nostdlib -lgcc
 
 CC = $$HOME/workspace/operating-systems/osproj/i686-gcc/bin/i686-elf-gcc
 C_FLAGS = -c -O0 -gdwarf-4 -ffreestanding -Wall -Wextra -std=gnu99
-C_FILES = kernel.c
+C_FILES = kernel terminal vga string
 
 IS_MULTI = $(shell if grub_file --is-x86-multiboot $(BIN_FILE); \
 			then echo "Multiboot not found."; \
 			else echo "Multiboot found."; fi)
 
 BIN_FILE = $(BIN_DIR)osproj.bin
-OBJ_FILES = $(OBJ_DIR)boot.o
 
 QEMU = qemu-system-i386
 
@@ -31,16 +30,22 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 	then echo "-gdb tcp::$(GDBPORT)"; \
 	else echo "-s -p $(GDBPORT)"; fi)
 
-kernel: clean
-	$(AS) $(AS_FLAGS) -o $(OBJ_DIR)boot.o $(AS_FILES)
-	$(CC) $(C_FLAGS) $(SRC_DIR)kernel.c -o $(OBJ_DIR)kernel.o
-	$(CC) $(LD_FLAGS)
+
+$(C_FILES):
+	$(CC) $(C_FLAGS) -o $(OBJ_DIR)$@.o $(SRC_DIR)$@.c
+
+$(AS_FILES):
+	$(AS) $(AS_FLAGS) -o $(OBJ_DIR)$@.o $(SRC_DIR)$@.S
+
+
+build: $(C_FILES) $(AS_FILES)
+	$(CC) $(LD_FLAGS) $(OBJ_DIR)*.o
 	objdump -x -d -S -s -dwarf $(BIN_FILE) > $(DUMP_DIR)osproj.asm
 
-qemu: kernel
+qemu: build
 	$(QEMU) $(QEMU_ARGS)
 
-qemu-gdb: kernel
+qemu-gdb: build
 	$(QEMU) $(QEMU_ARGS) -S $(QEMUGDB)
 
 clean:

@@ -1,11 +1,13 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "terminal.h"
+#include "vga.h"
 
 
 void kern_main(void)
 {
-    asm("movl $0x50, %eax");
-    asm("addl $0x50, %eax");
+    vga_init();
+    terminal_init();
     return;
 }

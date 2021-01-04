@@ -39,6 +39,7 @@ _start:
     call kern_main
 
     cli
+    hlt
 .loop:
     jmp .loop
 

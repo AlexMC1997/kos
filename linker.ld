@@ -1,9 +1,5 @@
 ENTRY(_start)
 
-STARTUP(./obj/boot.o)
-
-INPUT(./obj/kernel.o)
-
 OUTPUT(./bin/osproj.bin)
 
 SECTIONS
