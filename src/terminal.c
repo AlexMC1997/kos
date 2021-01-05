@@ -22,6 +22,7 @@ void clear_term()
     tcursor[1] = 0;
 }
 
+//scrolls terminal by 1 row
 void term_scroll()
 {
     uint16_t p = (uint16_t)VGA_COL_MAX;
@@ -35,6 +36,7 @@ void term_scroll()
         vga_putc(term_color, ' ', p);
 }
 
+//prints char to terminal
 int8_t tputc(char c)
 {
     switch (c) {
@@ -61,6 +63,7 @@ int8_t tputc(char c)
     return 0;
 }
 
+//prints len chars to terminal
 int8_t twrite(char* s, size_t len)
 {
     for (uint32_t ind = 0; ind < len; ind++)
@@ -68,14 +71,15 @@ int8_t twrite(char* s, size_t len)
     return 0;
 }
 
+//prints null-terminated string to terminal
 int8_t tputs(char* s)
 {
     return twrite(s, strlen(s));
 }
 
+//initializes terminal
 int8_t terminal_init(void)
 {
-    vgamax = (uint16_t)((VGA_END - VGA_START) / 2);
     term_color = vga_char_attr(VGA_BLACK, VGA_WHITE);
 
     clear_term();
