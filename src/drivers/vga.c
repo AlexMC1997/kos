@@ -1,3 +1,6 @@
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -92,10 +95,10 @@ void vga_disable_blink(void)
     outb((uint8_t)(reg & 0xF7), vga.ATTR_ADD_REG);
 }
 
-//sets CRT register address to 0x3D4/0x3D5 and stat reg to 0x3DA
+//sets CRT registeraddress to 0x3D4/0x3D5 and stat reg to 0x3DA
 uint8_t vga_set_port(uint8_t a)
 {
-    uint8_t reg;
+    register uint8_t reg asm("%al");
     
     if (a > 1)
         return -1;
@@ -121,3 +124,5 @@ uint8_t vga_init(void)
 
     return 0;
 }
+
+#pragma GCC pop_options

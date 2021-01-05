@@ -44,7 +44,16 @@ int8_t tputc(char c)
         tcursor[0] = VGA_COL_MAX;
         break;
 
+        case '\t':
+        tputc(' ');
+        tputc(' ');
+        tputc(' ');
+        tputc(' ');
+        break;
+
         default:
+        if (c < 0x20)
+            break;
         vga_putc(term_color, c, cursor_val);
         tcursor[0]++;
     }
@@ -87,7 +96,7 @@ int8_t terminal_init(void)
     //TESTING
     vga_color clr = VGA_WHITE;
     bool b = false;
-    for (int i = 1; i; i++) {
+    for (;;) {
         term_color = vga_char_attr(VGA_BLACK, clr);
         if (clr == 15)
             clr = 0;
@@ -96,7 +105,7 @@ int8_t terminal_init(void)
             tputc('\n');
             b = false;
         } else {
-            tputs("Terminal initialized.");
+            tputs("Terminal\tinitialized.");
             b = true;
         }
     }

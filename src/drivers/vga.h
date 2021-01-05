@@ -95,7 +95,6 @@ uint8_t vga_init(void);
 vga_attr vga_char_attr(vga_color bg, vga_color fg);
 void vga_putc(vga_attr col, char c, uint16_t pos);
 vga_char vga_getc(uint16_t pos);
-
 void vga_mv_cursor(uint16_t pos);
 void vga_disable_cursor(void);
 void vga_enable_cursor(void);
