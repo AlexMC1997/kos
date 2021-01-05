@@ -7,8 +7,11 @@
 extern const uint8_t VGA_COL_MAX;
 extern const uint8_t VGA_ROW_MAX;
 extern const uintptr_t VGA_START;
+extern const uintptr_t VGA_END;
 
 typedef uint8_t vga_attr;
+typedef uint16_t vga_char;
+
 typedef enum __vga_color {
     VGA_BLACK,
     VGA_BLUE,
@@ -76,14 +79,28 @@ typedef enum __attr_reg {
     REG_ATTR_MD_CONT,
 } attr_reg;
 
+struct vga_device {
+    port16 MISC_OUT_REG_RD; 
+    port16 MISC_OUT_REG_WR; 
+    port16 CRT_ADD_REG; 
+    port16 CRT_DATA_REG; 
+    port16 ATTR_ADD_REG; 
+    port16 ATTR_DATA_REG; 
+    port16 IN_STAT_REG_1; 
 
+    uint16_t* text_buffer;
+};
+
+uint8_t vga_init(void);
 vga_attr vga_char_attr(vga_color bg, vga_color fg);
 void vga_putc(vga_attr col, char c, uint16_t pos);
+vga_char vga_getc(uint16_t pos);
+
 void vga_mv_cursor(uint16_t pos);
 void vga_disable_cursor(void);
 void vga_enable_cursor(void);
 void vga_disable_underline(void);
 void vga_disable_blink(void);
-uint8_t vga_init(void);
+void vga_text_scroll(void);
 
 #endif

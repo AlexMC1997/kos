@@ -5,19 +5,6 @@
 #include "io.h"
 #include "vga.h"
 
-
-struct vga_device {
-    port16 MISC_OUT_REG_RD; 
-    port16 MISC_OUT_REG_WR; 
-    port16 CRT_ADD_REG; 
-    port16 CRT_DATA_REG; 
-    port16 ATTR_ADD_REG; 
-    port16 ATTR_DATA_REG; 
-    port16 IN_STAT_REG_1; 
-
-    uint16_t* text_buffer;
-};
-
 //struct representing the VGA card
 //do not change port numbers
 struct vga_device vga;
@@ -25,6 +12,7 @@ struct vga_device vga;
 const uint8_t VGA_COL_MAX = 80;
 const uint8_t VGA_ROW_MAX = 25;
 const uintptr_t VGA_START = 0xB8000;
+const uintptr_t VGA_END = 0xBFFFF;
 
 void vga_device_init(struct vga_device* v)
 {
@@ -36,7 +24,7 @@ void vga_device_init(struct vga_device* v)
     v->ATTR_DATA_REG = (port16)0x3C1;
     v->IN_STAT_REG_1 = (port16)0x3DA;
 
-    v->text_buffer = (uint16_t*)VGA_START;
+    v->text_buffer = (vga_char*)VGA_START;
 }
 
 //generates vga character attribute
@@ -49,6 +37,12 @@ vga_attr vga_char_attr(vga_color bg, vga_color fg)
 void vga_putc(vga_attr attr, char c, uint16_t pos)
 {
     vga.text_buffer[pos] = (uint16_t)attr << 8 | c;
+}
+
+//gets a vga char from screen buffer
+vga_char vga_getc(uint16_t pos)
+{
+    return vga.text_buffer[pos];
 }
 
 void vga_mv_cursor(uint16_t pos)
