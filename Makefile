@@ -1,3 +1,4 @@
+SRC_DIR := "./src/"
 SRC_DIRS := "./src/libc/" "./src/drivers/" "./src/kernel/"
 BIN_DIR := ./bin/
 OBJ_DIR := "./obj/"
@@ -23,7 +24,7 @@ $(OBJ_DIR):
 	make -C ./src/drivers/ all $(MAKEFLAGS)
 	make -C ./src/kernel/ all $(MAKEFLAGS)
 
-$(BIN_FILE): $(wildcard $(addsuffix **/*, $(SRC_DIRS))) | $(OBJ_DIR)
+$(BIN_FILE): $(shell find $(SRC_DIR) -type f) | $(OBJ_DIR)
 	$(CC) $(LD_FLAGS) $(shell find $(OBJ_DIR) -name "*.o")
 	grub-file --is-x86-multiboot $(BIN_FILE)
 	objdump -x -d -S -s -dwarf $(BIN_FILE) > $(DUMP_DIR)osproj.asm
