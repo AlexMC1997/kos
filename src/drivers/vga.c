@@ -1,5 +1,5 @@
 #pragma GCC push_options
-#pragma GCC optimize ("O0")
+#pragma GCC optimize("O0")
 
 #include <stdarg.h>
 #include <stddef.h>

@@ -2,9 +2,10 @@
 #define __terminal
 #include <stdint.h>
 
+void clear_term(void);
+void tputc(char c);
+void tputs(char* s);
+void twrite(char* s, size_t len);
 int8_t terminal_init(void);
-int8_t tputc(char c);
-int8_t tputs(char* s);
-int8_t twrite(char* s, size_t len);
 
 #endif
