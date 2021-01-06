@@ -23,13 +23,14 @@ $(OBJ_DIR):
 	make -C ./src/drivers/ all $(MAKEFLAGS)
 	make -C ./src/kernel/ all $(MAKEFLAGS)
 
-$(BIN_FILE): $(OBJ_DIR)
+$(BIN_FILE): $(wildcard $(addsuffix **/*, $(SRC_DIRS))) | $(OBJ_DIR)
 	$(CC) $(LD_FLAGS) $(shell find $(OBJ_DIR) -name "*.o")
 	grub-file --is-x86-multiboot $(BIN_FILE)
 	objdump -x -d -S -s -dwarf $(BIN_FILE) > $(DUMP_DIR)osproj.asm
 
 build: $(BIN_FILE)
-	echo Project built successfully.
+
+rebuild: clean build
 
 qemu: build
 	$(QEMU) $(QEMU_ARGS)

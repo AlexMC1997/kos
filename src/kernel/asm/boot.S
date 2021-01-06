@@ -24,6 +24,7 @@ stack_top:
 .global _start
 .type _start, @function
 _start:
+    cli
     //Stack init
     movl $stack_top, %esp
     
