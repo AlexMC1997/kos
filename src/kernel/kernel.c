@@ -4,6 +4,8 @@
 #include "terminal.h"
 #include "vga.h"
 #include "string.h"
+#include "panic.h"
+#include "assert.h"
 
 
 void kern_main(void)
@@ -19,5 +21,7 @@ void kern_main(void)
 
     tputc(0x31 + result);
     tputc(0x30 + *ptr3);
+
+    assert(t == s);
     return;
 }

@@ -76,14 +76,14 @@ void tputc(char c)
 }
 
 //prints len chars to terminal
-void twrite(char* s, size_t len)
+void twrite(const char* s, size_t len)
 {
     for (uint32_t ind = 0; ind < len; ind++)
         tputc(s[ind]);
 }
 
 //prints null-terminated string to terminal
-void tputs(char* s)
+void tputs(const char* s)
 {
     twrite(s, strlen(s));
 }

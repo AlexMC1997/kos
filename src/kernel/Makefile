@@ -3,7 +3,7 @@ include /home/alex/workspace/operating-systems/osproj/kos/src/makefile
 OBJ_DIR := $(ROOT_DIR)obj/kernel/
 
 AS_FLAGS := -O0 -gdwarf-4 -g3
-C_FLAGS := -c -O0 -gdwarf-4 -g3 -ffreestanding -Wall -Wextra -std=gnu99
+C_FLAGS := -c -O0 -gdwarf-4 -gpubnames -g3 -ffreestanding -Wall -Wextra -std=gnu99
 
 all: $(addprefix $(OBJ_DIR), $(OBJ)) $(addprefix $(OBJ_DIR), $(AS_OBJ))
 

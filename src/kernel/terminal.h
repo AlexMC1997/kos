@@ -4,8 +4,8 @@
 
 void clear_term(void);
 void tputc(char c);
-void tputs(char* s);
-void twrite(char* s, size_t len);
+void tputs(const char* s);
+void twrite(const char* s, size_t len);
 int8_t terminal_init(void);
 
 #endif

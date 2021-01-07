@@ -5,7 +5,7 @@ OBJ_DIR := "./obj/"
 DUMP_DIR := ./dumps/
 
 CC := $$HOME/workspace/operating-systems/osproj/i686-gcc/bin/i686-elf-gcc
-LD_FLAGS := -T linker.ld -ffreestanding -O0 -gdwarf-4 -g3 -nostdlib -lgcc
+LD_FLAGS := -T linker.ld -ffreestanding -O0 -gdwarf-4 -gpubnames -g3 -nostdlib -lgcc
 
 BIN_FILE := $(BIN_DIR)osproj.bin
 
