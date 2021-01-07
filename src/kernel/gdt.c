@@ -1,6 +1,10 @@
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+
 #include <stdalign.h>
 #include <stdint.h>
 #include <limits.h>
+#include <stddef.h>
 
 struct __GDT_ENTRY {
     uint16_t limit_0_15;
@@ -18,14 +22,31 @@ struct __GDT_ENTRY {
     uint8_t Sz : 1;
     uint8_t Gr : 1;
     uint8_t base_24_31;
-};
+} __attribute__((__packed__));
 
 struct __GDT_DESCRIPT {
     uint16_t size;
     const struct __GDT_ENTRY* offset;
-};
+} __attribute__((__packed__));
 
 const struct __GDT_ENTRY GDT[] = {
+    { //NULL segment
+        .limit_0_15 =   0,
+        .base_0_15 = 0,
+        .base_16_23 = 0,
+        .Ac =    0,
+        .RW =    0,
+        .DC =    0,
+        .Ex =    0,
+        .S =     0,
+        .Privl = 0,
+        .Pr =    0,
+        .limit_16_19 = 0,
+        .none = 0,
+        .Sz = 0,
+        .Gr = 0,
+        .base_24_31 = 0
+    },
     { //Code Selector
         .limit_0_15 =   UINT16_MAX,
         .base_0_15 = 0,
@@ -61,6 +82,7 @@ const struct __GDT_ENTRY GDT[] = {
         .base_24_31 = 0
     }
 };
-const struct __GDT_DESCRIPT GDT_DESCRIPT = { 1, GDT };
+const struct __GDT_DESCRIPT GDT_DESCRIPT = { (3*sizeof(struct __GDT_ENTRY))-1, GDT };
 const struct __GDT_DESCRIPT* GDT_DESCRIPT_PTR = &GDT_DESCRIPT;
 
+#pragma GCC pop_options

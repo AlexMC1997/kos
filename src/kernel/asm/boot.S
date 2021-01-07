@@ -32,8 +32,17 @@ _start:
     //FP init
 
     //Load GDT
-    movl $GDT_DESCRIPT_PTR, %eax
+    movl GDT_DESCRIPT_PTR, %eax
     lgdt (%eax)
+    ljmpl $0x8, $load_cs
+
+load_cs:
+    movw $0x10, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    movw %ax, %fs
+    movw %ax, %gs
+    movw %ax, %ss
 
     //Enable paging
 

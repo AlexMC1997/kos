@@ -5,7 +5,7 @@ OBJ_DIR := "./obj/"
 DUMP_DIR := ./dumps/
 
 CC := $$HOME/workspace/operating-systems/osproj/i686-gcc/bin/i686-elf-gcc
-LD_FLAGS := -T linker.ld -ffreestanding -O0 -gdwarf-4 -nostdlib -lgcc
+LD_FLAGS := -T linker.ld -ffreestanding -O0 -gdwarf-4 -g3 -nostdlib -lgcc
 
 BIN_FILE := $(BIN_DIR)osproj.bin
 
@@ -24,7 +24,7 @@ $(OBJ_DIR):
 	make -C ./src/drivers/ all $(MAKEFLAGS)
 	make -C ./src/kernel/ all $(MAKEFLAGS)
 
-$(BIN_FILE): $(shell find $(SRC_DIR) -type f) | $(OBJ_DIR)
+$(BIN_FILE): $(shell find $(SRC_DIR) -type f) linker.ld | $(OBJ_DIR)
 	$(CC) $(LD_FLAGS) $(shell find $(OBJ_DIR) -name "*.o")
 	grub-file --is-x86-multiboot $(BIN_FILE)
 	objdump -x -d -S -s -dwarf $(BIN_FILE) > $(DUMP_DIR)osproj.asm
