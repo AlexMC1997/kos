@@ -21,6 +21,7 @@ stack_top:
 
 //Kernel Entry - no paging, no interrupts, protected mode
 .section .text
+.extern GDT_DESCRIPT_PTR
 .global _start
 .type _start, @function
 _start:
@@ -31,6 +32,8 @@ _start:
     //FP init
 
     //Load GDT
+    movl $GDT_DESCRIPT_PTR, %eax
+    lgdt (%eax)
 
     //Enable paging
 
