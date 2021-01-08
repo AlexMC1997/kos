@@ -1,5 +1,5 @@
-#ifndef __terminal
-#define __terminal
+#ifndef _TERMINAL_H
+#define _TERMINAL_H
 #include <stdint.h>
 
 void clear_term(void);

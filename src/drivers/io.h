@@ -1,5 +1,5 @@
-#ifndef __io
-#define __io
+#ifndef _IO_H
+#define _IO_H
 #include "stdint.h"
 
 #define outb(b, p) asm("outb %1, %0" : : "dN"(p), "a"(b))
