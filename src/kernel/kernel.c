@@ -6,10 +6,16 @@
 #include "string.h"
 #include "panic.h"
 #include "assert.h"
+#include "multiboot.h"
+#include "kmmap.h"
 
-
-void kern_main(void)
+//Kernel C entry; passed GRUB info for parsing
+void kern_main(uint32_t magic, multiboot_info* mbi)
 {
+    assert(magic == MULTIBOOT_MAGIC);
+
+    kmmap_init(mbi->mmap_addr, mbi->mmap_length);
+
     vga_init();
     terminal_init();
 

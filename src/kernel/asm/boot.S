@@ -26,8 +26,13 @@ stack_top:
 .type _start, @function
 _start:
     cli
-    //Stack init
+
+    //Initialize stack
     movl $stack_top, %esp
+
+    //Push GRUB multiboot info onto stack for C
+    push %ebx
+    push %eax
     
     //FP init
 
