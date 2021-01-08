@@ -44,12 +44,9 @@ void vga_disable_underline(void)
 //Enable/disable blink flag on text attribute
 void vga_disable_blink(void)
 {
-    register uint8_t reg asm("%al");
-    inb(reg, vga.IN_STAT_REG_1); //sets addr reg to index
-    reg = (uint8_t)(REG_ATTR_MD_CONT | 0x20);
-    outb(reg, vga.ATTR_ADD_REG);
-    inb(reg, vga.ATTR_DATA_REG);
-    outb((uint8_t)(reg & 0xF7), vga.ATTR_ADD_REG);
+    uint8_t tmp;
+    vga_attr_read(REG_ATTR_MD_CONT, &tmp);
+    vga_attr_write(REG_ATTR_MD_CONT, (tmp & 0xF7));
 }
 
 void vga_text_init(void)

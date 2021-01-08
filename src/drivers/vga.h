@@ -81,5 +81,7 @@ void vga_misc_out_read(uint8_t* dest);
 void vga_crtc_write(crt_reg reg, uint8_t val);
 void vga_crtc_read(crt_reg reg, uint8_t* dest);
 void vga_device_init(struct vga_device* vga, uint8_t* buffer_start);
+void vga_attr_write(attr_reg reg, uint8_t val);
+void vga_attr_read(attr_reg reg, uint8_t* dest);
 
 #endif

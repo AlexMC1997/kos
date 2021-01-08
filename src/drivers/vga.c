@@ -66,11 +66,11 @@ void vga_crtc_read(crt_reg reg, uint8_t* dest)
 }
 
 //Writes val to VGA Attribute Data Register.
-void vga_attr_write(attr_reg reg, uint8_t val)
+void vga_attr_write(attr_reg reg, uint8_t val) //Needs handling for palette writes
 {
     register uint8_t reg_al asm("%al");
     inb(reg_al, vga.IN_STAT_REG_1); //sets addr reg to index
-    reg_al = reg;
+    reg_al = reg | 0x20; //Prevents PAS overwrite
     outb(reg_al, vga.ATTR_ADD_REG);
     reg_al = val;
     outb(reg_al, vga.ATTR_ADD_REG); //write data to addr register because vga
@@ -81,7 +81,7 @@ void vga_attr_read(attr_reg reg, uint8_t* dest)
 {
     register uint8_t reg_al asm("%al");
     inb(reg_al, vga.IN_STAT_REG_1); //sets addr reg to index
-    reg_al = reg;
+    reg_al = reg | 0x20; //Prevents PAS overwrite
     outb(reg_al, vga.ATTR_ADD_REG);
     inb(reg_al, vga.ATTR_DATA_REG);
     *dest = reg_al;
