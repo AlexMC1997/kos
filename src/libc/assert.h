@@ -6,6 +6,7 @@
 //Tests expr. Panics if false.
 #define assert(expr) {\
     if (!(expr)) {\
-        panic("Assertion failure.");\
+        tprintf("\nAssert failed.\nSource File: %s\nSource Line: %d\nFunction: %s\n", __FILE__, __LINE__, __func__);\
+        asm("hlt");\
 }}
 #endif

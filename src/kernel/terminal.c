@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "vga.h"
+#include "vgatext.h"
 #include "terminal.h"
 #include "string.h"
 
@@ -86,6 +86,96 @@ void twrite(const char* s, size_t len)
 void tputs(const char* s)
 {
     twrite(s, strlen(s));
+}
+
+//prints formatted output to terminal
+void tprintf(const char* format, ...)
+{
+    char c;
+    unsigned int tmp, tmp2, tmp3;
+    tf_arg arg;
+    va_list vl;
+    
+    char* fmt = (char*)format;
+    int alpha = 0x60;
+    bool spec = false;
+    bool sgn = true;
+
+    va_start(vl, format);
+
+    for (; (c = *fmt); fmt++) {
+        if (spec) { //process format specifier
+            switch (c) {
+                case 'l': //does nothing on IA32
+                break;
+
+                case 's':
+                arg.s = (const char*)va_arg(vl, int);
+                tputs(arg.s);
+                goto reset;
+
+                case 'c':
+                arg.dhh = va_arg(vl, int);
+                tputc(arg.dhh);
+                goto reset;
+
+                case 'u':
+                sgn = false; /* fall through */
+                case 'd':
+                arg.d = va_arg(vl, int);
+                tmp = 1000000000;
+
+                if ((int)arg.d < 0 && sgn) {
+                    arg.d = -arg.d;
+                    tputc('-');
+                }
+
+                while (arg.d < tmp)
+                    tmp = (tmp == 1) ? 0 : tmp / 10;
+                while (tmp) {
+                    tputc(0x30 + (arg.d / tmp));
+                    arg.d %= tmp;
+                    tmp = (tmp == 1) ? 0 : tmp / 10;
+                }
+                goto reset;
+                
+                case 'X':
+                alpha = 0x40; /* fall through */
+                case 'x':
+                arg.x = va_arg(vl, int);
+                tmp = 28;
+
+                tputc('0');
+                tputc('x');
+
+                for (; !((arg.x >> tmp) & 0xF); tmp -= 4);
+                for (; tmp + 4; tmp-=4) {
+                    tmp2 = (arg.x >> tmp) & 0xF;
+                    if (tmp2 > 9)
+                        tputc(alpha + (tmp2 % 9));
+                    else 
+                        tputc(0x30 + tmp2);
+                }
+                goto reset;
+
+                reset:
+                default:
+                alpha = 0x60;
+                sgn = true;
+                spec = false;
+            }
+        } else switch (c) {
+            case '%':
+            spec = true;
+            break;
+
+            default:
+            tputc(c);
+            break;
+        }
+    }
+    
+    va_end(vl);
 }
 
 //initializes terminal

@@ -4,32 +4,17 @@
 #include <stdint.h>
 #include "io.h"
 
-extern const uint8_t VGA_COL_MAX;
-extern const uint8_t VGA_ROW_MAX;
-extern const uintptr_t VGA_START;
-extern const uintptr_t VGA_END;
+extern struct vga_device vga;
 
-typedef uint8_t vga_attr;
-typedef uint16_t vga_char;
-
-typedef enum __vga_color {
-    VGA_BLACK,
-    VGA_BLUE,
-    VGA_GREEN,
-    VGA_CYAN,
-    VGA_RED,
-    VGA_MAGENTA,
-    VGA_ORANGE,
-    VGA_GREY,
-    VGA_DGREY,
-    VGA_BABYBLUE,
-    VGA_LIME,
-    VGA_TEAL,
-    VGA_SCARLET,
-    VGA_PINK,
-    VGA_YELLOW,
-    VGA_WHITE
-} vga_color;
+typedef enum __misc_out_flag {
+    FL_IOAS,
+    FL_RAM_EN,
+    FL_CLK_SEL,
+    FL_CLK_SEL_2,
+    FL_OE_PG,
+    FL_HSYNCP,
+    FL_VSYNCP
+} misc_out_flag;
 
 typedef enum __crt_reg {
     REG_H_TOTAL,
@@ -88,18 +73,13 @@ struct vga_device {
     port16 ATTR_DATA_REG; 
     port16 IN_STAT_REG_1; 
 
-    uint16_t* text_buffer;
+    uint8_t* buffer;
 };
 
-uint8_t vga_init(void);
-vga_attr vga_char_attr(vga_color bg, vga_color fg);
-void vga_putc(vga_attr col, char c, uint16_t pos);
-vga_char vga_getc(uint16_t pos);
-void vga_mv_cursor(uint16_t pos);
-void vga_disable_cursor(void);
-void vga_enable_cursor(void);
-void vga_disable_underline(void);
-void vga_disable_blink(void);
-void vga_text_scroll(void);
+void vga_misc_out_write(uint8_t val);
+void vga_misc_out_read(uint8_t* dest);
+void vga_crtc_write(crt_reg reg, uint8_t val);
+void vga_crtc_read(crt_reg reg, uint8_t* dest);
+void vga_device_init(struct vga_device* vga, uint8_t* buffer_start);
 
 #endif

@@ -40,8 +40,8 @@ qemu-gdb: build
 	$(QEMU) $(QEMU_ARGS) -S $(QEMUGDB)
 
 clean:
-	-rm -f $(BIN_DIR)*.bin $(DUMP_DIR)*.asm
-	-rm -r $(OBJ_DIR)/*
+	-safe-rm $(BIN_DIR)*.bin $(DUMP_DIR)*.asm 2>/dev/null
+	-safe-rm -r $(OBJ_DIR)/* 2>/dev/null
 
 #backup of stdint.h
 

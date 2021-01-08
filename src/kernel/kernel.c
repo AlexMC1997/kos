@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "terminal.h"
-#include "vga.h"
+#include "vgatext.h"
 #include "string.h"
 #include "panic.h"
 #include "assert.h"
@@ -16,7 +16,7 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
 
     kmmap_init(mbi->mmap_addr, mbi->mmap_length);
 
-    vga_init();
+    vga_text_init();
     terminal_init();
 
     char t[5] = {1, 2, 3, 4, 5};
@@ -27,6 +27,9 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
 
     tputc(0x31 + result);
     tputc(0x30 + *ptr3);
+
+    tputc('\n');
+    tprintf("tes\e[0;31m]ting ... ! : %s ... %c ... %s \nSo you think you can beat me, %x?", "it worked!", '\n', "yep, totally", 0x55F);
 
     assert(t == s);
     return;
