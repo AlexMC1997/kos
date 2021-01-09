@@ -1,26 +1,21 @@
 #include "string.h"
 #include "stdint.h"
 
-//Sums n bytes of str1 to n bytes of str2 then compares them.
-//str1 > str2 returns 1
-//str1 == str2 returns 0
-//str1 < str2 returns -1
-int memcmp(const void *str1, const void *str2, size_t n)
+//Compares n bytes from ptr1 to n bytes from ptr2.
+//If each byte is exactly equal, returns 0.
+//On the first byte found that differs, the function returns:
+//-1 if the byte from ptr2 is larger, 1 otherwise.
+int memcmp(const void *ptr1, const void *ptr2, size_t n)
 {
-    uintmax_t sum1 = 0;
-    uintmax_t sum2 = 0;
-    uint8_t* str1_t = (uint8_t*)str1;
-    uint8_t* str2_t = (uint8_t*)str2;
-    
+    uint8_t* ptr1_t = (uint8_t*)ptr1;
+    uint8_t* ptr2_t = (uint8_t*)ptr2;
+
     for (size_t i = 0; i < n; i++) {
-        sum1 += str1_t[i];
-        sum2 += str2_t[i];
+        if (ptr1_t[i] > ptr2_t[i])
+            return 1;
+        if (ptr1_t[i] < ptr2_t[i])
+            return -1;
     }
 
-    if (sum1 > sum2) 
-        return 1;
-    else if (sum2 > sum1) 
-        return -1;
-    else 
-        return 0;
+    return 0;
 }
