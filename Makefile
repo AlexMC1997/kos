@@ -11,7 +11,7 @@ BIN_FILE := $(BIN_DIR)osproj.bin
 
 QEMU := qemu-system-i386
 
-QEMU_ARGS := -kernel $(BIN_FILE) -monitor stdio -smp 1 -m 256M
+QEMU_ARGS := -kernel $(BIN_FILE) -monitor stdio -smp 2 -m 256M
 # try to generate a unique GDB port
 GDBPORT = $(shell expr `id -u` % 5000 + 25000)
 # QEMU's gdb stub command line changed in 0.11
@@ -31,7 +31,7 @@ $(BIN_FILE): $(shell find $(SRC_DIR) -type f) linker.ld | $(OBJ_DIR)
 
 build: $(BIN_FILE)
 
-rebuild: clean build
+rebuild: clean | build
 
 qemu: build
 	$(QEMU) $(QEMU_ARGS)
