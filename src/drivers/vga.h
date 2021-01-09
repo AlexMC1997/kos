@@ -6,7 +6,7 @@
 
 extern struct vga_device vga;
 
-typedef enum __misc_out_flag {
+typedef enum {
     FL_IOAS,
     FL_RAM_EN,
     FL_CLK_SEL,
@@ -16,7 +16,7 @@ typedef enum __misc_out_flag {
     FL_VSYNCP
 } misc_out_flag;
 
-typedef enum __crt_reg {
+typedef enum {
     REG_H_TOTAL,
     REG_H_END,
     REG_H_TOTAL_START,
@@ -44,7 +44,7 @@ typedef enum __crt_reg {
     REG_LINE_CMP
 } crt_reg;
 
-typedef enum __attr_reg {
+typedef enum {
     REG_PAL_0,
     REG_PAL_1,
     REG_PAL_2,

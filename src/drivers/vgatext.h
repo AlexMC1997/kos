@@ -12,7 +12,9 @@ extern const uint8_t VGA_ROW_MAX;
 extern const uintptr_t VGA_START;
 extern const uintptr_t VGA_END;
 
-typedef enum __vga_color {
+#ifndef __VGA_COLOR_ENUM
+#define __VGA_COLOR_ENUM
+typedef enum {
     VGA_BLACK,
     VGA_BLUE,
     VGA_GREEN,
@@ -30,6 +32,7 @@ typedef enum __vga_color {
     VGA_YELLOW,
     VGA_WHITE
 } vga_color;
+#endif
 
 void vga_text_init(void);
 vga_attr vga_char_attr(vga_color bg, vga_color fg);

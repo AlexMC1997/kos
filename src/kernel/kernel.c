@@ -29,7 +29,18 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     tputc(0x30 + *ptr3);
 
     tputc('\n');
-    tprintf("tes\e[0;31m]ting ... ! : %s ... %c ... %s \nSo you think you can beat me, %x?", "it worked!", '\n', "yep, totally", 0x55F);
+    tprintf("testing ... ! : %s ... %c ... %s \nSo you think you can beat me, %x?", "it worked!", '\n', "yep, totally", 291);
+
+    tputc('\n');
+    tputc('\n');
+    tcputs(VGA_DGREY, VGA_TEAL, "Yo we doing colors now!\n");
+
+    tputs("test\n");
+    
+    tcputs(VGA_GREEN, VGA_MAGENTA, "Yo we doing colors now!\n");
+    tcputs(VGA_BLUE, VGA_ORANGE, "Yo we doing colors now!\n");
+
+
 
     assert(t == s);
     return;

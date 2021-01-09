@@ -75,6 +75,15 @@ void tputc(char c)
     vga_mv_cursor(cursor_val);
 }
 
+//prints colored char to terminal
+void tcputc(vga_color bg, vga_color fg, char c)
+{
+    vga_attr tmp = term_color;
+    term_color = vga_char_attr(bg, fg);
+    tputc(c);
+    term_color = tmp;
+}
+
 //prints len chars to terminal
 void twrite(const char* s, size_t len)
 {
@@ -86,6 +95,15 @@ void twrite(const char* s, size_t len)
 void tputs(const char* s)
 {
     twrite(s, strlen(s));
+}
+
+//prints colored null-terminated string to terminal
+void tcputs(vga_color bg, vga_color fg, const char* s)
+{
+    vga_attr tmp = term_color;
+    term_color = vga_char_attr(bg, fg);
+    twrite(s, strlen(s));
+    term_color = tmp;
 }
 
 //prints formatted output to terminal
