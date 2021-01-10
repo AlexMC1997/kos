@@ -62,4 +62,3 @@ load_cs:
     jmp .loop
 
 .size _start, . - _start
-

@@ -40,7 +40,7 @@ static void vga_text_panic(char* panicmsg)
     panic_newline();
 
     if (panicmsg) {
-        for (uint16_t i = 0; i < 25; i++) {
+        for (uint16_t i = 0; i < 50; i++) {
             if (!panicmsg[i]) {
                 valid_msg = true;
                 break;
@@ -60,7 +60,7 @@ static void vga_text_panic(char* panicmsg)
 }
 
 //Prints error diagnostics, including panicmsg, then halts system. 
-//panicmsg must be 25 characters or less. Does not return.
+//panicmsg must be 50 characters or less. Does not return.
 void panic(char* panicmsg)
 {
     cli();

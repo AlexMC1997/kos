@@ -8,13 +8,18 @@
 #include "assert.h"
 #include "multiboot.h"
 #include "kmmap.h"
+#include "cpu.h"
+#include "acpi.h"
 
 //Kernel C entry; passed GRUB info for parsing
 void kern_main(uint32_t magic, multiboot_info* mbi)
 {
-    assert(magic == MULTIBOOT_MAGIC);
+    if (magic != MULTIBOOT_MAGIC)
+        panic("Multiboot magic mismatch.");
 
+    cpu_init();
     kmmap_init(mbi->mmap_addr, mbi->mmap_length);
+    acpi_init();
 
     vga_text_init();
     terminal_init();
