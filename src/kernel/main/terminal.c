@@ -222,7 +222,7 @@ int8_t terminal_init(void)
     }
 
     notest:
-    tputs("Terminal initialized.");
+    tputs("Terminal initialized.\n");
 
     return 0;
 }

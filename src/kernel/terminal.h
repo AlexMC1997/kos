@@ -1,6 +1,8 @@
 #ifndef _TERMINAL_H
 #define _TERMINAL_H
+
 #include <stdint.h>
+#include <stddef.h>
 
 #ifndef __VGA_COLOR_ENUM
 #define __VGA_COLOR_ENUM

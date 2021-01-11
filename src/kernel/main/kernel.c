@@ -10,6 +10,10 @@
 #include "kmmap.h"
 #include "cpu.h"
 #include "acpi.h"
+#include "pic.h"
+#include "idt.h"
+#include "gdt.h"
+#include "io.h"
 
 //Kernel C entry; passed GRUB info for parsing
 void kern_main(uint32_t magic, multiboot_info* mbi)
@@ -23,6 +27,18 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
 
     vga_text_init();
     terminal_init();
+
+    idt_init();
+    pic_init();
+    tss_init();
+
+    sti();
+
+    asm("int $40");
+    asm("push %eax");
+
+    uint32_t tmp = r_esp();
+    uint8_t tmp2 = 0;
 
     char t[5] = {1, 2, 3, 4, 5};
     char s[5] = {2, 3, 4, 5, 6};

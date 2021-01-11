@@ -3,7 +3,7 @@ ENTRY(_start)
 OUTPUT(./bin/osproj.bin)
 
 SECTIONS
-{
+{   
     . = 1M;
 
     .text BLOCK(4K) : ALIGN(4K)

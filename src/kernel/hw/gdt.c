@@ -1,35 +1,13 @@
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 
-#include <stdalign.h>
-#include <stdint.h>
 #include <limits.h>
 #include <stddef.h>
+#include "gdt.h"
+#include "io.h"
+#include "terminal.h"
 
-struct __GDT_ENTRY {
-    uint16_t limit_0_15;
-    uint16_t base_0_15;
-    uint8_t base_16_23;
-    uint8_t Ac : 1;
-    uint8_t RW : 1;
-    uint8_t DC : 1;
-    uint8_t Ex : 1;
-    uint8_t S : 1;
-    uint8_t Privl : 2;
-    uint8_t Pr : 1;
-    uint8_t limit_16_19 : 4;
-    uint8_t none : 2;
-    uint8_t Sz : 1;
-    uint8_t Gr : 1;
-    uint8_t base_24_31;
-} __attribute__((__packed__));
-
-struct __GDT_DESCRIPT {
-    uint16_t size;
-    const struct __GDT_ENTRY* offset;
-} __attribute__((__packed__));
-
-const struct __GDT_ENTRY GDT[] = {
+struct gdt_entry GDT[] = {
     { //NULL segment
         .limit_0_15 =   0,
         .base_0_15 = 0,
@@ -116,7 +94,7 @@ const struct __GDT_ENTRY GDT[] = {
         .base_24_31 = 0
     },
     { //Task State Selector
-        .limit_0_15 =   UINT16_MAX,
+        .limit_0_15 =  0xFFFF & sizeof(struct tss_entry),
         .base_0_15 = 0,
         .base_16_23 = 0,
         .Ac =    1, //TSS not LDT
@@ -126,14 +104,35 @@ const struct __GDT_ENTRY GDT[] = {
         .S =     0, 
         .Privl = 0,
         .Pr =    1,
-        .limit_16_19 = 0xF,
+        .limit_16_19 = sizeof(struct tss_entry) >> 16,
         .none = 0,
-        .Sz = 0,
-        .Gr = 1,
+        .Sz = 1,
+        .Gr = 0,
         .base_24_31 = 0
     }
 };
-const struct __GDT_DESCRIPT GDT_DESCRIPT = { (6*sizeof(struct __GDT_ENTRY))-1, GDT };
-const struct __GDT_DESCRIPT* GDT_DESCRIPT_PTR = &GDT_DESCRIPT;
+
+const struct gdt_descript GDT_DESCRIPT = { (6*sizeof(struct gdt_entry))-1, GDT };
+const struct gdt_descript* GDT_DESCRIPT_PTR = &GDT_DESCRIPT;
+
+struct tss_entry tss;
+
+void tss_init()
+{
+    GDT[5].base_0_15 = (uint16_t)((uint32_t)&tss & 0xFFFF);
+    GDT[5].base_16_23 = ((uint32_t)(&tss) >> 16) & 0xFF;
+    GDT[5].base_24_31 = ((uint32_t)(&tss) >> 24) & 0xFF;
+
+    tss.ss0 = 0x10; //kernel data segment
+
+    asm volatile ("movw $0x28, %%ax; ltr %%ax" : : : "ax");
+
+    tputs("TSS initialized.\n");
+}
+
+void tss_set_stack(uint32_t stack)
+{
+    tss.esp0 = stack;
+}
 
 #pragma GCC pop_options
