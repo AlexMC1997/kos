@@ -141,6 +141,12 @@ void tprintf(const char* format, ...)
                 sgn = false; /* fall through */
                 case 'd':
                 arg.d = va_arg(vl, int);
+
+                if (!arg.d) {
+                    tputc('0');
+                    goto reset;
+                }
+                
                 tmp = 1000000000;
 
                 if ((int)arg.d < 0 && sgn) {

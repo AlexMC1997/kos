@@ -26,8 +26,8 @@ $(OBJ_DIR):
 
 $(BIN_FILE): $(shell find $(SRC_DIR) -type f) linker.ld | $(OBJ_DIR)
 	$(CC) $(LD_FLAGS) $(shell find $(OBJ_DIR) -name "*.o")
-	grub-file --is-x86-multiboot $(BIN_FILE)
 	objdump -x -d -S -s -dwarf $(BIN_FILE) > $(DUMP_DIR)osproj.asm
+	grub-file --is-x86-multiboot $(BIN_FILE)
 
 build: $(BIN_FILE)
 
