@@ -1,6 +1,13 @@
 #include <stdint.h>
 #include "gcc.h"
 
+#define GDT_NULL_SEG 0
+#define GDT_KCODE_SEG 0x8
+#define GDT_KDATA_SEG 0x10
+#define GDT_UCODE_SEG 0x18
+#define GDT_UDATA_SEG 0x20
+#define GDT_TASK_SEG 0x28
+
 struct tss_entry {
     uint32_t prev;
     uint32_t esp0;
@@ -29,7 +36,7 @@ struct tss_entry {
     uint32_t ldt;
     uint32_t trap;
     uint32_t iomap_base;
-} attr_packed;
+} gcc_packed;
 
 struct gdt_entry {
     uint16_t limit_0_15;
@@ -47,12 +54,12 @@ struct gdt_entry {
     uint8_t Sz : 1;
     uint8_t Gr : 1;
     uint8_t base_24_31;
-} attr_packed;
+} gcc_packed;
 
 struct gdt_descript {
     uint16_t size;
     const struct gdt_entry* offset;
-} attr_packed;
+} gcc_packed;
 
 void tss_init();
 void tss_set_stack(uint32_t stack);

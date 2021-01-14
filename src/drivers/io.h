@@ -9,7 +9,8 @@
 #define sti() asm("sti")
 #define hlt() asm("hlt")
 
-static inline uint32_t attr_inline r_esp() {
+//Returns the current value of the stack pointer
+static inline uint32_t gcc_inline r_esp() {
     register uint32_t reg_eax asm("%eax");
     asm volatile ("movl %esp, %eax"); 
     return reg_eax; 

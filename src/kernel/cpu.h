@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <gcc.h>
 
 typedef struct {
     uint32_t stepping : 4;
@@ -12,14 +13,14 @@ typedef struct {
     uint32_t type : 2;
     uint32_t ext_model : 4;
     uint32_t ext_family : 8;
-} __attribute__((__packed__)) id_type;
+} gcc_packed id_type;
 
 typedef struct {
     uint32_t brand : 8;
     uint32_t clflush : 8;
     uint32_t cpu_cnt : 8;
     uint32_t apic_id : 8;
-} __attribute__((__packed__)) id_cpu;
+} gcc_packed id_cpu;
 
 typedef struct { //Do not change structure
     char vendor[13];
@@ -34,7 +35,7 @@ typedef struct { //Do not change structure
     uint32_t conf_c;
     uint32_t conf_d;
 
-} __attribute__((__packed__)) cpuid;
+} gcc_packed cpuid;
 
 typedef struct {
     cpuid info;

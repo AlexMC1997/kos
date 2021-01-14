@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "elf.h"
+#include "gcc.h"
 
 #define MULTIBOOT_MAGIC 0x2BADB002
 
@@ -19,7 +20,7 @@ typedef struct __boot_device {
     uint8_t part2;
     uint8_t part1;
     uint8_t drive;
-} __attribute__((__packed__)) boot_device;
+} gcc_packed boot_device;
 
 typedef struct __multiboot_mmap {
     size_t size; //ignore
@@ -28,7 +29,7 @@ typedef struct __multiboot_mmap {
     size_t length_low;
     size_t length_high;
     uint32_t type;
-} __attribute__((__packed__)) multiboot_mmap;
+} gcc_packed multiboot_mmap;
 
 typedef struct __multiboot_info {
     uint32_t flags;
@@ -45,6 +46,6 @@ typedef struct __multiboot_info {
     size_t mmap_length;
     multiboot_mmap* mmap_addr;
     
-} __attribute__((__packed__)) multiboot_info;
+} gcc_packed multiboot_info;
 
 #endif
