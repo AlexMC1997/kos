@@ -123,11 +123,9 @@ void tss_init()
     GDT[5].base_16_23 = ((uint32_t)(&tss) >> 16) & 0xFF;
     GDT[5].base_24_31 = ((uint32_t)(&tss) >> 24) & 0xFF;
 
-    tss.ss0 = 0x10; //kernel data segment
+    tss.ss0 = GDT_KDATA_SEG;
 
     asm volatile ("movw $0x28, %%ax; ltr %%ax" : : : "ax");
-
-    tputs("TSS initialized.\n");
 }
 
 void tss_set_stack(uint32_t stack)

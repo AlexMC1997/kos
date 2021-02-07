@@ -6,11 +6,59 @@
 .set CHECKSUM, -(MAGIC + FLAGS) // multiboot checksum
 
 //Multiboot Header
-.section .multiboot
+.section .multiboot, "a"
 .align 4
 .long MAGIC
 .long FLAGS
 .long CHECKSUM
+
+//Enables paging, remaps the kernel and then jumps to kernel entry
+.section .prelude, "a", @progbits
+.global _prelude
+.type _prelude, @function
+_prelude:
+    cli
+
+    xorl %ecx, %ecx
+    xorl %edx, %edx
+    movl $0b10000011, %edi
+
+_build_dir_entry:
+    movl %edi, (%ecx)
+    addl $2, %ecx
+    movb %dl, (%ecx)
+    shlb $6, (%ecx)
+    incl %ecx
+    rorl $2, %edx
+    movb %dl, (%ecx)
+    roll $2, %edx
+    incl %ecx
+    incl %edx
+    cmpl $0x400, %edx
+    jnz _build_dir_entry
+
+    //Adjust 3 GiB mapping to 0 - 4 MiB
+    movl $0xC00, %ecx //3 GB
+    movl $0x83, (%ecx)
+
+    //Load temporary 4Mib page directory
+    xorl %edx, %edx
+    movl %edx, %cr3
+
+    //Enable large pages
+    movl %cr4, %edx
+    orl $0x10, %edx
+    movl %edx, %cr4
+
+    //Paging enable
+    movl %cr0, %edx
+    orl $0x80000000, %edx
+    movl %edx, %cr0
+
+    //Jump to the high kernel
+    jmp _entry
+
+
 
 //stack over bss
 .section .bss
@@ -19,14 +67,12 @@ stack_bottom:
 .skip 0x4000 //16 kb stack
 stack_top:
 
-//Kernel Entry - no paging, no interrupts, protected mode
+//Kernel Entry - no interrupts, protected mode
 .section .text
 .extern GDT_DESCRIPT_PTR
-.global _start
-.type _start, @function
-_start:
-    cli
-
+.global _entry
+.type _entry, @function
+_entry:
     //Initialize stack
     movl $stack_top, %esp
 
@@ -49,8 +95,6 @@ load_cs:
     movw %ax, %gs
     movw %ax, %ss
 
-    //Enable paging
-
     //C++ init
 
     //C Entry
@@ -61,7 +105,7 @@ load_cs:
 .loop:
     jmp .loop
 
-.size _start, . - _start
+.size _entry, . - _entry
 
 //placeholder
 .global _trap_as

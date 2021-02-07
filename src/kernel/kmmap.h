@@ -20,6 +20,9 @@ typedef struct __memarea {
     void* addr;
 } memarea;
 
-memarea* kmmap_init(multiboot_mmap* m_mmap, size_t len);
+extern memarea kmmap[KMMAP_LEN];
+extern size_t kmmap_len;
+
+void kmmap_init(size_t len, multiboot_mmap* m_mmap);
 
 #endif

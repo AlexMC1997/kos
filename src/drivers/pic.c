@@ -41,6 +41,4 @@ void pic_init()
 
     pic_mask(master_pic, 0xFF);
     pic_mask(slave_pic, 0xFF);
-
-    tputs("PIC initialized.\n");
 }
