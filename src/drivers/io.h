@@ -10,7 +10,7 @@
 #define hlt() asm("hlt")
 
 //Returns the current value of the stack pointer
-static inline uint32_t gcc_inline r_esp() {
+static inline gcc_inline uint32_t r_esp() {
     register uint32_t reg_eax asm("%eax");
     asm volatile ("movl %esp, %eax"); 
     return reg_eax; 
