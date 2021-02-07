@@ -3,7 +3,7 @@
 
 //Copies n bytes from src to dest. 
 //Regions must not overlap.
-void* memcpy(void* dest, void* src, size_t n)
+void* memcpy(void* restrict dest, void* restrict src, size_t n)
 {
     uint8_t tmp;
     uint8_t* src_t = (uint8_t*)src;
