@@ -22,8 +22,8 @@ _prelude:
     xorl %ecx, %ecx
     xorl %edx, %edx
     movl $0b10000011, %edi
-
-_build_dir_entry:
+    
+_build_dir_entry: //Builds the Kernel's identity page directory, 4 MiB pages
     movl %edi, (%ecx)
     addl $2, %ecx
     movb %dl, (%ecx)
@@ -41,7 +41,7 @@ _build_dir_entry:
     movl $0xC00, %ecx //3 GB
     movl $0x83, (%ecx)
 
-    //Load temporary 4Mib page directory
+    //Load the page directory
     xorl %edx, %edx
     movl %edx, %cr3
 
@@ -50,14 +50,13 @@ _build_dir_entry:
     orl $0x10, %edx
     movl %edx, %cr4
 
-    //Paging enable
+    //Enable paging
     movl %cr0, %edx
     orl $0x80000000, %edx
     movl %edx, %cr0
 
     //Jump to the high kernel
     jmp _entry
-
 
 
 //stack over bss
@@ -76,7 +75,7 @@ _entry:
     //Initialize stack
     movl $stack_top, %esp
 
-    //Push GRUB multiboot info onto stack for C
+    //Push GRUB multiboot info onto stack for C entry
     push %ebx
     push %eax
     
@@ -85,6 +84,8 @@ _entry:
     //Load GDT
     movl GDT_DESCRIPT_PTR, %eax
     lgdt (%eax)
+
+    //Load segments
     ljmpl $0x8, $load_cs
 
 load_cs:
@@ -95,7 +96,7 @@ load_cs:
     movw %ax, %gs
     movw %ax, %ss
 
-    //C++ init
+    //Global constructors
 
     //C Entry
     call kern_main
