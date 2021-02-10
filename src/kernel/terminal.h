@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifndef __VGA_COLOR_ENUM
 #define __VGA_COLOR_ENUM
@@ -40,6 +41,8 @@ typedef union {
     const char* s;
     unsigned int x;
 } tf_arg;
+
+extern bool term_initialized;
 
 void clear_term(void);
 void tputc(char c);

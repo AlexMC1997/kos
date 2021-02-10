@@ -8,6 +8,8 @@
 
 #define cursor_val (t_cursor[1] * VGA_COL_MAX) + t_cursor[0]
 
+bool term_initialized = 0;
+
 uint16_t t_cursor[2];
 uint16_t vgamax;
 vga_attr term_color;
@@ -228,6 +230,7 @@ int8_t terminal_init(void)
     }
 
     notest:
+    term_initialized = 1;
     tputs("Terminal initialized.\n");
 
     return 0;

@@ -3,11 +3,14 @@
 #include "stdint.h"
 #include "gcc.h"
 
-#define outb(b, p) asm("outb %1, %0" : : "dN"(p), "a"(b))
-#define inb(b, p) asm("inb %1, %0" : "=a"(b) : "dN"(p))
+#define outb(b, p) asm volatile ("outb %1, %0" : : "dN"(p), "a"(b))
+#define inb(b, p) asm volatile ("inb %1, %0" : "=a"(b) : "dN"(p))
 #define cli() asm("cli")
 #define sti() asm("sti")
 #define hlt() asm("hlt")
+#define mbar() asm volatile ("":::"memory")
+#define mfence() asm volatile ("mfence":::"memory")
+#define pause() asm volatile ("pause":::"memory")
 
 //Returns the current value of the stack pointer
 static inline gcc_inline uint32_t r_esp() {
