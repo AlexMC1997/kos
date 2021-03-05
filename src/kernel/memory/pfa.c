@@ -12,34 +12,34 @@
 
 //Notes: page daemon will do bookkeeping 
 
-PFA_Flags flags;
+static PFA_Flags flags;
 
-pg_num_4k_t stack_pg_4k[SZ_4_MAX];
-pg_num_16k_t stack_pg_16k[SZ_16_MAX];
-pg_num_64k_t stack_pg_64k[SZ_64_MAX];
-pg_num_256k_t stack_pg_256k[SZ_256_MAX];
-pg_num_1024k_t stack_pg_1024k[SZ_1024_MAX];
+static pg_num_4k_t stack_pg_4k[SZ_4_MAX];
+static pg_num_16k_t stack_pg_16k[SZ_16_MAX];
+static pg_num_64k_t stack_pg_64k[SZ_64_MAX];
+static pg_num_256k_t stack_pg_256k[SZ_256_MAX];
+static pg_num_1024k_t stack_pg_1024k[SZ_1024_MAX];
 
-size_t stack_4k_ptr;
-size_t stack_16k_ptr;
-size_t stack_64k_ptr;
-size_t stack_256k_ptr;
-size_t stack_1024k_ptr;
+static size_t stack_4k_ptr;
+static size_t stack_16k_ptr;
+static size_t stack_64k_ptr;
+static size_t stack_256k_ptr;
+static size_t stack_1024k_ptr;
 
-size_t last_4k;
-uint8_t last_4k_sub;
+static size_t last_4k;
+static uint8_t last_4k_sub;
 
-size_t last_16k;
-uint8_t last_16k_sub;
+static size_t last_16k;
+static uint8_t last_16k_sub;
 
-size_t last_64k;
+static size_t last_64k;
 
-size_t last_256k;
+static size_t last_256k;
 
-size_t last_1024k;
+static size_t last_1024k;
 
-pg_map_t* pg_reservoir;
-size_t reservoir_size;
+static pg_map_t* pg_reservoir;
+static size_t reservoir_size;
 
 //Reserves a region in the reservoir
 void pfa_mask_region(pg_num_4k_t page_start, pg_num_4k_t page_end)
@@ -70,16 +70,13 @@ void pfa_mask_region(pg_num_4k_t page_start, pg_num_4k_t page_end)
     }
 }
 
-//Fetches a free 4k page from the reservoir
-//Should be run on init and by the daemon
-static int fetch_pg_4k(pg_num_4k_t* ptr)
+//Updates last_4k and last_4k_sub, 
+//pointing it to the next free 4k page in the reservoir.
+static int find_4k()
 {
-    *ptr = ((pg_num_4k_t)last_4k << 3) | last_4k_sub;
-    pg_reservoir[last_4k] &= ~(1 << last_4k_sub);
-
-    if (pg_reservoir[last_4k] & (1 << ++last_4k_sub))
+    if (pg_reservoir[last_4k] & (1 << last_4k_sub))
         return 0;
-
+    
     for (size_t init = last_4k; !pg_reservoir[last_4k];) {
         last_4k++;
         if (last_4k >= reservoir_size)
@@ -89,26 +86,40 @@ static int fetch_pg_4k(pg_num_4k_t* ptr)
     }
 
     for (last_4k_sub = 0; !(pg_reservoir[last_4k] & (1 << last_4k_sub)); last_4k_sub++);
-    assert(pg_reservoir[last_4k] & (1 << last_4k_sub));
+    
     return 0;
 }
 
-//Fetches 4 free contiguous, 16k aligned 4k pages from the reservoir
+//Fetches a free 4k page from the reservoir
 //Should be run on init and by the daemon
-static int fetch_pg_16k(pg_num_4k_t* ptr)
+static int fetch_pg_4k(pg_num_4k_t* ptr)
+{
+    //Must call this first, in case page was swept by another stack
+    if (find_4k())
+        return -1;
+
+    assert(pg_reservoir[last_4k] & (1 << last_4k_sub));
+    
+    *ptr = ((pg_num_4k_t)last_4k << 3) | last_4k_sub;
+    pg_reservoir[last_4k] &= ~(1 << last_4k_sub);
+
+    last_4k_sub++;
+
+    return 0;
+}
+
+//Updates last_16k and last_16k_sub, 
+//pointing it to the next free 16k region in the reservoir.
+static int find_16k()
 {
     pg_map_t tmp;
 
-    *ptr = (pg_num_4k_t)(((last_16k << 1) | last_16k_sub) << 2);
-    pg_reservoir[last_16k << 2] &= ~(0xF << last_16k_sub);
-    last_16k_sub += 4;
-
-    if ((pg_reservoir[last_16k] & (0xF << last_16k_sub)) == (0xF << last_16k_sub))
+    if (last_16k_sub <= 4 && (pg_reservoir[last_16k] & (0xF << last_16k_sub)) == (0xF << last_16k_sub))
         return 0;
 
     for (
         size_t init = last_16k; 
-        !((tmp = pg_reservoir[last_16k] & 0xF) == 0xF || (tmp & 0xF0) == 0xF0); 
+        !((((tmp = pg_reservoir[last_16k]) & 0xF) == 0xF) || ((tmp & 0xF0) == 0xF0)); 
     ) {
         last_16k++;
         if (last_16k >= reservoir_size)
@@ -118,7 +129,23 @@ static int fetch_pg_16k(pg_num_4k_t* ptr)
     }
 
     last_16k_sub = (tmp & 0xF) == 0xF ? 0 : 4;
-    assert(pg_reservoir[last_4k] & (1 << last_4k_sub));
+
+    return 0;
+}
+
+//Fetches 4 free contiguous, 16k aligned 4k pages from the reservoir
+//Should be run on init and by the daemon
+static int fetch_pg_16k(pg_num_16k_t* ptr)
+{
+    if (find_16k())
+        return -1;
+
+    assert((pg_reservoir[last_16k] & (0xF << last_16k_sub)) == (0xF << last_16k_sub));
+    
+    *ptr = (pg_num_16k_t)((last_16k << 1) | (last_16k_sub >> 2));
+    pg_reservoir[last_16k] &= ~(0xF << last_16k_sub);
+    last_16k_sub += 4;
+    
     return 0;
 }
 
@@ -140,12 +167,14 @@ int pfa_pf_alloc(PF_Size sz, pg_num_4k_t* ptr)
 
         case PF_16K:
         if (!stack_16k_ptr)
-            fetch_pg_16k(ptr);
+            fetch_pg_16k((pg_num_16k_t*)ptr);
         else
             *ptr = stack_pg_16k[--stack_16k_ptr];
         
         if (stack_16k_ptr < SZ_16_UDF)
             flags.refill_16 = 1;
+
+        *ptr <<= 2; //adjust to 4k num
         break;
 
         default:
@@ -158,10 +187,9 @@ int pfa_pf_alloc(PF_Size sz, pg_num_4k_t* ptr)
 //Each bit represents a page, a 4096 byte region of memory
 //1 - free
 //0 - used
-static void pg_reservoir_init(size_t kmmap_len, memarea* kmmap)
+static void pg_reservoir_init(size_t kmmap_len, Memarea* kmmap)
 {
     size_t cur, cursize, i;
-    
     size_t phys_mem = 0;
 
     for (i = 0; i < kmmap_len; i++) {
@@ -218,20 +246,15 @@ static void pg_reservoir_init(size_t kmmap_len, memarea* kmmap)
     }
 }
 
-
 static void stack_4k_init()
 {
-    stack_4k_ptr = 0;
+    last_4k = 0;
     last_4k_sub = 0;
 
-    for (; last_4k < reservoir_size && !pg_reservoir[last_4k]; last_4k++);
+    pg_num_4k_t dummy;
     
-    if (last_4k >= reservoir_size)
+    if (fetch_pg_4k(&dummy))
         panic("No 4k page found during init!");
-    
-    for (; last_4k_sub < 8 && !(pg_reservoir[last_4k] & (1 << last_4k_sub)); last_4k_sub++);
-    
-    assert(pg_reservoir[last_4k] & (1 << last_4k_sub));
 
     for (stack_4k_ptr = 0; stack_4k_ptr < SZ_4_GD; stack_4k_ptr++) {
         if (fetch_pg_4k((stack_pg_4k + stack_4k_ptr))) {
@@ -240,10 +263,28 @@ static void stack_4k_init()
     }
 }
 
+static void stack_16k_init()
+{
+    last_16k = 0;
+    last_16k_sub = 0;
+
+    pg_num_16k_t dummy;
+    
+    if (fetch_pg_16k(&dummy))
+        panic("No 16k region found during init!");
+
+    for (stack_16k_ptr = 0; stack_16k_ptr < SZ_16_GD; stack_16k_ptr++) {
+        if (fetch_pg_16k((stack_pg_16k + stack_16k_ptr))) {
+            panic("Ran out of 16k regions in stack init.");
+        }
+    }
+}
+
 //Initializes the Page Frame Allocator. This system is
 //required by the Virtual Memory Manager to function.
-void pfa_init(size_t kmmap_len, memarea* kmmap)
+void pfa_init(size_t kmmap_len, Memarea* kmmap)
 {
     pg_reservoir_init(kmmap_len, kmmap);
     stack_4k_init();
+    stack_16k_init();
 }

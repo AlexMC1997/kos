@@ -55,6 +55,7 @@ typedef struct {
 int vmm_vms_alloc(size_t len, VMS_Entry* vms, PD_Entry** ph_ptr);
 int vmm_pt_alloc(PD_Entry* ph_ptr, PT_Entry** pt_ptr);
 int vmm_pd_alloc(PD_Entry** ph_ptr);
+int vmm_pd_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PD_Entry pd_ptr[]);
 
 
 #endif

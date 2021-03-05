@@ -32,6 +32,9 @@ int vmm_pt_alloc(PD_Entry* ph_ptr, PT_Entry* pt_ptr[])
     if (pfa_pf_alloc(PF_4K, &tmp))
         return -1;
     
+    //CHECK IF VALID, FETCH FROM SWAP IF SO
+    //SHOULD PASS IN VALID FLAG
+
     //Nulls page table
     memset((uint8_t*)(tmp << 12), 0, PG_SIZE);
 
@@ -60,6 +63,9 @@ int vmm_pg_alloc_4k(PT_Entry pt[], pg_num_4k_t base, size_t len)
             continue;
         if (pfa_pf_alloc(PF_4K, &tmp))
             goto cleanup;
+        
+        //MUST ALSO CHECK IF VALID, FETCH FROM SWAP IF SO
+        
         pt[base + ind].addr_0_3 = (uint8_t)(tmp & 0xF);
         pt[base + ind].addr_4_19 = (uint16_t)(tmp >> 4);
         pt[base + ind].present = 1;
@@ -127,9 +133,10 @@ int vmm_pd_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PD_Ent
             if (vmm_pt_alloc(pd_ptr + pd_ind, &cur_pt)) 
                 goto cleanup;
         
-        //Checks if page table is valid
-        //If it is, overwrite perm and write overrides if
-        //necessary; else create the entry
+        //Checks if page table is valid first, to
+        //avoid overwriting a higher table privilege
+        //than specified in new region.
+        //Otherwise it creates the table flags.
         if (pd_ptr[pd_ind].valid) {
             if (flags.user && !pd_ptr[pd_ind].user)
                 pd_ptr[pd_ind].user = 1;

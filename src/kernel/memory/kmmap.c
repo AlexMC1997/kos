@@ -2,7 +2,7 @@
 #include "pfa.h"
 #include "panic.h"
 
-memarea kmmap[KMMAP_LEN];
+Memarea kmmap[KMMAP_LEN];
 size_t kmmap_len;
 
 void kmmap_init(size_t len, multiboot_mmap* m_mmap)
@@ -16,6 +16,6 @@ void kmmap_init(size_t len, multiboot_mmap* m_mmap)
         }
         kmmap[i].addr = (void*)m_mmap[i].base_addr_low;
         kmmap[i].size = m_mmap[i].length_low;
-        kmmap[i].type = (mem_type)m_mmap[i].type;
+        kmmap[i].type = (Mem_Type)m_mmap[i].type;
     }
 }

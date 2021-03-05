@@ -54,7 +54,7 @@ typedef struct {
     uint32_t dump_1024 : 1;
 } gcc_packed PFA_Flags;
 
-void pfa_init(size_t kmmap_len, memarea* kmmap);
+void pfa_init(size_t kmmap_len, Memarea* kmmap);
 int pfa_pf_alloc(PF_Size sz, pg_num_4k_t* ptr);
 
 #endif
