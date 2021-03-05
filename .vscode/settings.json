@@ -1,5 +1,6 @@
 {
     "lldb.showDisassembly": "never",
     "lldb.dereferencePointers": false,
-    "lldb.displayFormat": "hex"
+    "lldb.displayFormat": "hex",
+    "C_Cpp.default.systemIncludePath": []
 }
