@@ -34,7 +34,7 @@ _build_dir_entry: //Builds the Kernel's identity page directory, 4 MiB pages
     roll $2, %edx
     incl %ecx
     incl %edx
-    cmpl $0x400, %edx
+    cmpl $0x200, %edx
     jnz _build_dir_entry
 
     //Adjust 3 GiB mapping to 0 - 4 MiB
