@@ -19,21 +19,26 @@ void* kbrk(pg_num_4k_t len)
     return ptr;
 }
 
-//Allocates a slab on kernel heap and returns it.
-static slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
+//Allocates a slab on kernel heap and returns its address.
+static Slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
 {
-    slab* the_slab = kbrk(slab_sz);
+    Slab* the_slab = kbrk(slab_sz);
     uint8_t* objs = &(the_slab->objs);
-    size_t end = (slab_sz * PG_SIZE) - sizeof(slab);
+    size_t* tmp;
+    size_t end = (slab_sz * PG_SIZE) - sizeof(Slab) - 2*obj_sz;
     
     the_slab->last_free = 0;
     the_slab->next = NULL;
     the_slab->state = SLAB_FREE;
 
     size_t i = 0;
-    for (size_t k = 1; i < end; i += obj_sz, k++)
-        objs[i] = k;
-    objs[i] = -1;
+    for (size_t k = 1; i < end; i += obj_sz, k++) {
+        tmp = objs + i;
+        //who even knows why
+        while ((*tmp = k) != k);
+    }
+    tmp = objs + i;
+    *tmp = -1;
     
     return the_slab;
 }
@@ -44,10 +49,13 @@ static slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
 //for the memory subsystem.
 void* kmalloc(kern_objs_e type)
 {
+    if (type >= KERN_OBJ_NUM)
+        panic("Invalid Kernel object.");
+
     pg_num_4k_t slab_sz = caches[type].slab_sz;
     size_t obj_sz = caches[type].obj_sz;
+    Slab* slab = caches[type].slabs;
     size_t fetch = 0;
-    slab* slab = caches[type].slabs;
 
     while (slab->state == SLAB_FULL) {
         if (!slab->next)
@@ -56,8 +64,9 @@ void* kmalloc(kern_objs_e type)
     }
 
     fetch = slab->last_free;
-    slab->last_free = *(&(slab->objs) + (slab->last_free * obj_sz));
-    if (slab->last_free = -1)
+    slab->last_free = *(uint32_t*)(&(slab->objs) + (slab->last_free * obj_sz));
+    slab->state = SLAB_PARTIAL;
+    if (slab->last_free == -1)
         slab->state = SLAB_FULL;
     goto end;
 
@@ -72,11 +81,15 @@ void* kmalloc(kern_objs_e type)
     return (&slab->objs) + (fetch * obj_sz);
 }
 
+//Initializes the slab allocator.
+//Each kernel object needs a cache which stores
+//its size and the size of its corresponding slab
+//in pages along with a pointer to the slab list itself.
 int kmm_init()
 {
-    caches[TEST_OBJ].slabs = slab_alloc(sizeof(test), 1);
-    caches[TEST_OBJ].obj_sz = sizeof(test);
-    caches[TEST_OBJ].slab_sz = 1;
+    new_cache(TEST_OBJ, test, 1);
+    new_cache(TEST2_OBJ, test2, 3);
+    new_cache(TEST3_OBJ, test3, 1);
 }
 
 int kfree(void* ptr, kern_objs_e type)

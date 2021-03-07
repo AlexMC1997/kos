@@ -49,10 +49,14 @@ int vmm_pt_alloc(PD_Entry* ph_ptr, PT_Entry* pt_ptr[])
 
 //Allocates 4k page frames for a range of pages from a page table.
 //May overlap already present regions.
+//The base address is simply rounded mod 1k.
+//It may be expressed as a full address or an offset.
 int vmm_pg_alloc_4k(PT_Entry pt[], pg_num_4k_t base, size_t len)
 {
     pg_num_4k_t tmp;
     size_t ind;
+
+    base %= PG_SIZE / 4;
 
     assert((base + len) <= (PG_SIZE / 4));
     if ((base + len) > (PG_SIZE / 4))

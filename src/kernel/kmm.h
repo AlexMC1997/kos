@@ -4,8 +4,15 @@
 #include <stddef.h>
 #include "gcc.h"
 
+#define new_cache(num, obj, slab_size) \
+    caches[num].slabs = slab_alloc(sizeof(obj), slab_size);\
+    caches[num].obj_sz = sizeof(obj);\
+    caches[num].slab_sz = slab_size; 
+
 typedef enum {
     TEST_OBJ,
+    TEST2_OBJ,
+    TEST3_OBJ,
     KERN_OBJ_NUM
 } kern_objs_e;
 
@@ -20,15 +27,25 @@ typedef struct {
     char smwh[20];
 } test;
 
+typedef struct {
+    int smth;
+    char smwh[1200];
+} test2;
+
+typedef struct _test3 {
+    test2* smth;
+    struct _test3* next;
+} test3;
+
 typedef struct _slab {
     slab_state_e state;
     uint32_t last_free;
     struct _slab* next;
     uint8_t objs;
-} gcc_packed slab;
+} gcc_packed Slab;
 
 typedef struct {
-    slab* slabs;
+    Slab* slabs;
     size_t obj_sz;
     pg_num_4k_t slab_sz;
 } Obj_Cache;

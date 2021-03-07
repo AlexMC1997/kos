@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <terminal.h>
 #ifdef NDEBUG
 #define assert(expr) (void)0 
 #else
