@@ -22,8 +22,9 @@ _prelude:
     xorl %ecx, %ecx
     xorl %edx, %edx
     movl $0b10000011, %edi
-    
-_build_dir_entry: //Builds the Kernel's identity page directory, 4 MiB pages
+
+//Builds the Kernel's identity page directory up to 2 GB, 4 MiB pages
+_build_dir_entry:
     movl %edi, (%ecx)
     addl $2, %ecx
     movb %dl, (%ecx)
@@ -66,7 +67,7 @@ stack_bottom:
 .skip 0x4000 //16 kb stack
 stack_top:
 
-//Kernel Entry - no interrupts, protected mode
+//Kernel Entry - no interrupts, protected mode, paging enabled
 .section .text
 .extern GDT_DESCRIPT_PTR
 .global _entry
