@@ -107,11 +107,4 @@ load_cs:
     jmp .loop
 
 .size _entry, . - _entry
-
-//placeholder
-.global _trap_as
-_trap_as:
-    movl $0x6028, %eax
-    add $0x06, %esp
-    iret
     

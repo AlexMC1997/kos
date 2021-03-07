@@ -19,6 +19,13 @@ static inline gcc_inline uint32_t r_esp() {
     return reg_eax; 
 }
 
+//Returns the current value of the CR2 register
+static inline gcc_inline uint32_t r_cr2() {
+    register uint32_t reg_eax asm("%eax");
+    asm volatile ("movl %cr2, %eax"); 
+    return reg_eax; 
+}
+
 typedef uint16_t port16;
 
 #endif
