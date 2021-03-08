@@ -14,9 +14,6 @@ void page_fault(Trap_Frame* tf)
         PD_Entry* pd = KERN_PD;
         PT_Entry* pt = ((pd[va >> 22].addr_4_19 << 4) | (pd[va >> 22].addr_0_3)) << 12;
         vmm_pg_alloc_4k(pt, va >> 12, 1);
-        uint8_t* marker = va - (va % PG_SIZE);
-        // memset(marker, 0x0, PG_SIZE);
-        *marker = 0;
     }
 }
 
