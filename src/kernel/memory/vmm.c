@@ -133,9 +133,11 @@ int vmm_pd_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PD_Ent
 
     for (; pd_ind < pd_end; pd_ind++) {
         //Checks if page table is already present
-        if (!pd_ptr[pd_ind].present) 
+        if (!pd_ptr[pd_ind].present) {
             if (vmm_pt_alloc(pd_ptr + pd_ind, &cur_pt)) 
                 goto cleanup;
+        } else 
+            cur_pt = pd_ptr[pd_ind].addr_0_3 | (pd_ptr[pd_ind].addr_4_19 << 4); 
         
         //Checks if page table is valid first, to
         //avoid overwriting a higher table privilege

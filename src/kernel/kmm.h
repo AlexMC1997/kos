@@ -37,10 +37,10 @@ typedef struct _test3 {
     struct _test3* next;
 } test3;
 
-typedef struct _slab {
+typedef struct _Slab {
     slab_state_e state;
-    uint32_t last_free;
-    struct _slab* next;
+    void** last_free;
+    struct _Slab* next;
     uint8_t objs;
 } gcc_packed Slab;
 

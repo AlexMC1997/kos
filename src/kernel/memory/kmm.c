@@ -27,18 +27,18 @@ static Slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
     size_t* tmp;
     size_t end = (slab_sz * PG_SIZE) - sizeof(Slab) - 2*obj_sz;
     
-    the_slab->last_free = 0;
+    the_slab->last_free = objs;
     the_slab->next = NULL;
     the_slab->state = SLAB_FREE;
 
     size_t i = 0;
-    for (size_t k = 1; i < end; i += obj_sz, k++) {
+    for (; i < end; i += obj_sz) {
         tmp = objs + i;
         //who even knows why
-        while ((*tmp = k) != k);
+        while ((*tmp = objs + i + obj_sz) != objs + i + obj_sz);
     }
     tmp = objs + i;
-    *tmp = -1;
+    *tmp = NULL;
     
     return the_slab;
 }
@@ -55,7 +55,7 @@ void* kmalloc(kern_objs_e type)
     pg_num_4k_t slab_sz = caches[type].slab_sz;
     size_t obj_sz = caches[type].obj_sz;
     Slab* slab = caches[type].slabs;
-    size_t fetch = 0;
+    void* fetch = NULL;
 
     while (slab->state == SLAB_FULL) {
         if (!slab->next)
@@ -64,9 +64,9 @@ void* kmalloc(kern_objs_e type)
     }
 
     fetch = slab->last_free;
-    slab->last_free = *(uint32_t*)(&(slab->objs) + (slab->last_free * obj_sz));
+    slab->last_free = *(slab->last_free);
     slab->state = SLAB_PARTIAL;
-    if (slab->last_free == -1)
+    if (!slab->last_free)
         slab->state = SLAB_FULL;
     goto end;
 
@@ -74,11 +74,11 @@ void* kmalloc(kern_objs_e type)
     slab->next = slab_alloc(obj_sz, slab_sz);
     slab = slab->next;
     slab->state = SLAB_PARTIAL;
-    slab->last_free = 1;
-    fetch = 0;
+    fetch = slab->last_free;
+    slab->last_free = *(slab->last_free);
 
     end:
-    return (&slab->objs) + (fetch * obj_sz);
+    return fetch;
 }
 
 //Initializes the slab allocator.
