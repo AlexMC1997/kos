@@ -12,7 +12,7 @@ void page_fault(Trap_Frame* tf)
     if (!code->user) {
         uintptr_t va = r_cr2();
         PD_Entry* pd = KERN_PD;
-        PT_Entry* pt = ((pd[va >> 22].addr_4_19 << 4) | (pd[va >> 22].addr_0_3)) << 12;
+        PT_Entry* pt = pd_addr_v(pd[va >> 22]) << 12;
         vmm_pg_alloc_4k(pt, va >> 12, 1);
     }
 }
@@ -22,8 +22,9 @@ void trap(Trap_Frame tf)
 {
     switch (tf.trap_no) {
         case FLT_PF:
+        tprintf("Page fault. Address: %x\n", r_cr2());
         page_fault(&tf);
-        return;
+        break;
 
         default:
         panic("Unhandled exception.");

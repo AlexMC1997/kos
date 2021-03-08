@@ -76,7 +76,7 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     except_init();
 
     kmm_init();
-    tputs("Kernel Memory Manager initialized.");
+    tputs("Kernel Memory Manager initialized.\n");
 
     tprintf("%x\n", r_esp());
 
