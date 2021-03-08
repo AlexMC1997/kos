@@ -8,21 +8,21 @@
 
 #define MULTIBOOT_MAGIC 0x2BADB002
 
-typedef struct __bootmod {
+typedef struct {
     uint8_t* mod_start;
     uint8_t* mod_end;
     char* string;
     uint32_t reserved;
 } bootmod;
 
-typedef struct __boot_device {
+typedef struct {
     uint8_t part3;
     uint8_t part2;
     uint8_t part1;
     uint8_t drive;
 } gcc_packed boot_device;
 
-typedef struct __multiboot_mmap {
+typedef struct {
     size_t size; //ignore
     uint8_t* base_addr_low;
     uint8_t* base_addr_high;
@@ -31,7 +31,7 @@ typedef struct __multiboot_mmap {
     uint32_t type;
 } gcc_packed multiboot_mmap;
 
-typedef struct __multiboot_info {
+typedef struct {
     uint32_t flags;
     size_t mem_lower;
     size_t mem_upper;

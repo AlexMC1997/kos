@@ -7,7 +7,7 @@
 #include "io.h"
 #include "terminal.h"
 
-struct gdt_entry GDT[] = {
+gdt_entry GDT[] = {
     { //NULL segment
         .limit_0_15 =   0,
         .base_0_15 = 0,
@@ -94,7 +94,7 @@ struct gdt_entry GDT[] = {
         .base_24_31 = 0
     },
     { //Task State Selector
-        .limit_0_15 =  0xFFFF & sizeof(struct tss_entry),
+        .limit_0_15 =  0xFFFF & sizeof(tss_entry),
         .base_0_15 = 0,
         .base_16_23 = 0,
         .Ac =    1, //TSS not LDT
@@ -104,7 +104,7 @@ struct gdt_entry GDT[] = {
         .S =     0, 
         .Privl = 0,
         .Pr =    1,
-        .limit_16_19 = sizeof(struct tss_entry) >> 16,
+        .limit_16_19 = sizeof(tss_entry) >> 16,
         .none = 0,
         .Sz = 1,
         .Gr = 0,
@@ -112,10 +112,10 @@ struct gdt_entry GDT[] = {
     }
 };
 
-const struct gdt_descript GDT_DESCRIPT = { (6*sizeof(struct gdt_entry))-1, GDT };
-const struct gdt_descript* GDT_DESCRIPT_PTR = &GDT_DESCRIPT;
+const gdt_descript GDT_DESCRIPT = { (6*sizeof(gdt_entry))-1, GDT };
+const gdt_descript* GDT_DESCRIPT_PTR = &GDT_DESCRIPT;
 
-struct tss_entry tss;
+tss_entry tss;
 
 void tss_init()
 {

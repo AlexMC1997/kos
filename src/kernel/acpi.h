@@ -1,19 +1,19 @@
 #ifndef _ACPI_H
 #define _ACPI_H
 
-struct rsdt {
+typedef struct {
 
-};
+} rsdt;
 
-struct rsdp {
+typedef struct {
     char signature[8];
     uint8_t checksum;
     char oemid[6];
     uint8_t revision;
-    struct rsdt* rsdt_ptr;
-};
+    rsdt* rsdt_ptr;
+} rsdp;
 
 void acpi_init();
-void get_rsdp(struct rsdp** ptr);
+void get_rsdp(rsdp** ptr);
 
 #endif

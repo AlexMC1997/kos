@@ -13,7 +13,7 @@ void acpi_init()
 }
 
 //Finds RSDP and assigns to ptr
-void get_rsdp(struct rsdp** ptr)
+void get_rsdp(rsdp** ptr)
 {
     char* pt = (char*)MEM_EBDA_START;
 
@@ -28,10 +28,10 @@ void get_rsdp(struct rsdp** ptr)
     panic("RSDP could not be found.");
     
     rsdp_found:
-    *ptr = (struct rsdp*)pt;
+    *ptr = (rsdp*)pt;
 
     uint32_t check = 0;
-    for (uint8_t i = 0; i < sizeof(struct rsdp); i++)
+    for (uint8_t i = 0; i < sizeof(rsdp); i++)
         check += *(pt + i);
     
     if ((uint8_t)check)
