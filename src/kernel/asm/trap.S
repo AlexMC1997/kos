@@ -1,7 +1,21 @@
 .global _trap_as
 _trap_as:
-    leal 4(%esp), %eax
+    addl $4, %esp
     pushl %eax
+    pushl %ebx
+    pushl %ecx
+    pushl %edx
+    pushl %esi
+    pushl %edi
+    pushl %ebp
     call trap
-    add $0x0e, %esp
+_detrap_as:
+    popl %ebp
+    popl %edi
+    popl %esi
+    popl %edx
+    popl %ecx
+    popl %ebx
+    popl %eax
+    addl $0x6, %esp
     iret

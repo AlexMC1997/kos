@@ -4,6 +4,7 @@
 #include "vmm.h"
 #include "mem.h"
 #include "panic.h"
+#include "string.h"
 
 void page_fault(Trap_Frame* tf)
 {
@@ -11,19 +12,20 @@ void page_fault(Trap_Frame* tf)
     if (!code->user) {
         uintptr_t va = r_cr2();
         PD_Entry* pd = KERN_PD;
-        int tmp1 = pd[va >> 22].addr_4_19 << 4;
-        int tmp2 = (pd[va >> 22].addr_0_3);
         PT_Entry* pt = ((pd[va >> 22].addr_4_19 << 4) | (pd[va >> 22].addr_0_3)) << 12;
-        vmm_pg_alloc_4k(pt, va >> 12, 4);
+        vmm_pg_alloc_4k(pt, va >> 12, 1);
+        uint8_t* marker = va - (va % PG_SIZE);
+        // memset(marker, 0x0, PG_SIZE);
+        *marker = 0;
     }
 }
 
 //C entry point for all exceptions.
-void trap(Trap_Frame* tf)
+void trap(Trap_Frame tf)
 {
-    switch (tf->trap_no) {
+    switch (tf.trap_no) {
         case FLT_PF:
-        page_fault(tf);
+        page_fault(&tf);
         return;
 
         default:
