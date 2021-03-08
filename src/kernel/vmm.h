@@ -52,6 +52,22 @@ typedef struct {
     Alloc_Flags flags;
 } VMS_Entry;
 
+static inline gcc_inline pg_num_4k_t pt_addr_v(PT_Entry pt) {
+    return (pg_num_4k_t)((pt.addr_4_19 << 4) | pt.addr_0_3);
+}
+
+static inline gcc_inline pg_num_4k_t pt_addr_p(PT_Entry* pt) {
+    return (pg_num_4k_t)((pt->addr_4_19 << 4) | pt->addr_0_3);
+}
+
+static inline gcc_inline pg_num_4k_t pd_addr_v(PD_Entry pd) {
+    return (pg_num_4k_t)((pd.addr_4_19 << 4) | pd.addr_0_3);
+}
+
+static inline gcc_inline pg_num_4k_t pd_addr_p(PD_Entry* pd) {
+    return (pg_num_4k_t)((pd->addr_4_19 << 4) | pd->addr_0_3);
+}
+
 int vmm_vms_alloc(size_t len, VMS_Entry* vms, PD_Entry** ph_ptr);
 int vmm_pt_alloc(PD_Entry* ph_ptr, PT_Entry** pt_ptr);
 int vmm_pd_alloc(PD_Entry** ph_ptr);

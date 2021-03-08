@@ -8,4 +8,7 @@
     1;\
 })
 
+//Aligns val to mod.
+#define ALIGN(val, mod) val - (val % mod)
+
 #endif
