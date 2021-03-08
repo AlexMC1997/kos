@@ -34,8 +34,7 @@ static Slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
     size_t i = 0;
     for (; i < end; i += obj_sz) {
         tmp = objs + i;
-        //who even knows why
-        while ((*tmp = objs + i + obj_sz) != objs + i + obj_sz);
+        *tmp = objs + i + obj_sz;
     }
     tmp = objs + i;
     *tmp = NULL;

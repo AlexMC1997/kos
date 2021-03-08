@@ -81,8 +81,8 @@ int vmm_pg_alloc_4k(PT_Entry pt[], pg_num_4k_t base, size_t len)
     return -1;
 }
 
-//Allocates specified region within a page table (4 MiB space)
-//Does not allocate physical memory
+//Allocates specified region within a page table (4 MiB space).
+//Does not allocate physical memory for relevant pages.
 int vmm_pt_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PT_Entry pt_ptr[])
 {
     pg_num_4k_t ind, p_addr, end;
@@ -113,6 +113,8 @@ int vmm_pt_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PT_Ent
 
 //Allocates region specified by addr and len in the 
 //virtual memory space indicated by pd_ptr.
+//Physical memory is allocated for relevant page tables,
+//but not for the pages within.
 int vmm_pd_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PD_Entry pd_ptr[])
 {
     PT_Entry* cur_pt;
