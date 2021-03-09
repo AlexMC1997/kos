@@ -5,7 +5,7 @@
 #include "acpi.h"
 #include "panic.h"
 
-struct rsdp* RSDP;
+rsdp* RSDP;
 
 void acpi_init()
 {

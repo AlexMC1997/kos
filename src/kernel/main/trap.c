@@ -8,11 +8,11 @@
 
 void page_fault(Trap_Frame* tf)
 {
-    PF_Code* code = &(tf->error_code);
+    PF_Code* code = (PF_Code*)&(tf->error_code);
     if (!code->user) {
         uintptr_t va = r_cr2();
         PD_Entry* pd = KERN_PD;
-        PT_Entry* pt = pd_addr_v(pd[va >> 22]) << 12;
+        PT_Entry* pt = (PT_Entry*)(pd_addr_v(pd[va >> 22]) << 12);
         vmm_pg_alloc_4k(pt, va >> 12, 1);
     }
 }

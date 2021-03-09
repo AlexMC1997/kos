@@ -5,14 +5,15 @@
 #include "vmm.h"
 #include "kmm.h"
 #include "mem.h"
+#include "panic.h"
 
-Obj_Cache caches[KERN_OBJ_NUM];
-void* kmm_break = KERN_TOP;
+static Obj_Cache caches[KERN_OBJ_NUM];
+static void* kmm_break = (void*)KERN_TOP;
 
 //Expands Kernel heap by len 4k pages.
 void* kbrk(pg_num_4k_t len)
 {
-    pg_num_4k_t brk_addr = (pg_num_4k_t)((uintptr_t)(kmm_break) >> 12);
+    pg_num_4k_t brk_addr = ((pg_num_4k_t)(kmm_break) >> 12);
     vmm_pd_vm_alloc(len, brk_addr, (Alloc_Flags){1, 0, 0, 0}, KERN_PD);
     void* ptr = kmm_break;
     kmm_break += len << 12;
@@ -23,16 +24,15 @@ void* kbrk(pg_num_4k_t len)
 static Slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
 {
     Slab* the_slab = kbrk(slab_sz);
-    uint8_t* objs = &(the_slab->objs);
-    size_t* tmp;
-    size_t end = (slab_sz * PG_SIZE) - sizeof(Slab) - 2*obj_sz;
+    void* objs = &(the_slab->objs);
+    void** tmp;
+    size_t i, end = (slab_sz * PG_SIZE) - sizeof(Slab) - 2*obj_sz;
     
-    the_slab->last_free = objs;
+    the_slab->last_free = (void**)objs;
     the_slab->next = NULL;
     the_slab->state = SLAB_FREE;
 
-    size_t i = 0;
-    for (; i < end; i += obj_sz) {
+    for (i = 0; i < end; i += obj_sz) {
         tmp = objs + i;
         *tmp = objs + i + obj_sz;
     }
@@ -89,9 +89,11 @@ int kmm_init()
     new_cache(TEST_OBJ, test, 1);
     new_cache(TEST2_OBJ, test2, 3);
     new_cache(TEST3_OBJ, test3, 1);
+
+    return 0;
 }
 
 int kfree(void* ptr, kern_objs_e type)
 {
-
+    return 0;
 }

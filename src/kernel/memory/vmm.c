@@ -85,7 +85,7 @@ int vmm_pg_alloc_4k(PT_Entry pt[], pg_num_4k_t base, size_t len)
 //Does not allocate physical memory for relevant pages.
 int vmm_pt_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PT_Entry pt_ptr[])
 {
-    pg_num_4k_t ind, p_addr, end;
+    pg_num_4k_t ind, end;
     ind = addr;
     end = addr + len;
 
@@ -139,7 +139,7 @@ int vmm_pd_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PD_Ent
             if (vmm_pt_alloc(pd_ptr + pd_ind, &cur_pt)) 
                 goto cleanup;
         } else 
-            cur_pt = pd_addr_v(pd_ptr[pd_ind]) << 12; 
+            cur_pt = (PT_Entry*)(pd_addr_v(pd_ptr[pd_ind]) << 12); 
         
         //Checks if page table is valid first, to
         //avoid overwriting a higher table privilege

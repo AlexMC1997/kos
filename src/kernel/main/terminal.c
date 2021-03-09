@@ -10,9 +10,8 @@
 
 bool term_initialized = 0;
 
-uint16_t t_cursor[2];
-uint16_t vgamax;
-vga_attr term_color;
+static uint16_t t_cursor[2];
+static vga_attr term_color;
 
 //clears one row of the terminal; begins at 0
 void clear_line(uint16_t row)
