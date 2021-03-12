@@ -17,6 +17,8 @@
 #include "pfa.h"
 #include "vmm.h"
 #include "kmm.h"
+#include "sll.h"
+#include "queue.h"
 
 //Initializes the exception system, including the PIC and interrupts
 void except_init()
@@ -36,6 +38,18 @@ void mem_init(size_t len, multiboot_mmap* m_mmap)
     tputs("Kernel memory map initialized.\n");
     pfa_init(kmmap_len, kmmap);
     tputs("Page Frame Allocator initialized.\n");
+}
+
+static void list_lambda(SLL_Node* node)
+{
+    static char arr[100];
+    static size_t i = 0;
+    arr[i] = (char)(node->data);
+    i++;
+    if (i == 5) {
+        tputs(arr);
+        i = 0;
+    }
 }
 
 static int pfa_testing()
@@ -115,24 +129,81 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
         tprintf("%d: %s\n", cur->smth->smth, cur->smth->smwh);
         cur = cur->next;
     } while (cur);
+    
+    cur = head;
+    do {
+        cur->smth->smth = 42;
+        memcpy(cur->smth->smwh, "Poly", 5);
+        cur = cur->next;
+    } while (cur);
+    
+    cur = head;
+    do {
+        tprintf("%d: %s\n", cur->smth->smth, cur->smth->smwh);
+        cur = cur->next;
+    } while (cur);
 
-    // VMS_Entry vm[3];
-    // PD_Entry* pd;
 
-    // vm[0].vm_addr = 1;
-    // vm[0].sz = 5;
-    // vm[0].flags.user = 0;
-    // vm[0].flags.write = 0;
-    // vm[1].vm_addr = 0xA;
-    // vm[1].sz = 3;
-    // vm[1].flags.user = 1;
-    // vm[1].flags.write = 1;
-    // vm[2].vm_addr = 0xA62F0;
-    // vm[2].sz = 150;
-    // vm[2].flags.user = 0;
-    // vm[2].flags.write = 1;
+    test* freetst = kmalloc(TEST_OBJ);
+    tprintf("Addr: %x\n", (size_t)freetst);
+    kfree(freetst, TEST_OBJ);
+    freetst = kmalloc(TEST_OBJ);
+    tprintf("Addr: %x\n", (size_t)freetst);
 
-    //vmm_vms_alloc(3, vm, &pd);
+    SLL* myList = sll_new_empty();
+
+    for (size_t i = 0; i < 0x50; i++) 
+        sll_add_front(myList, i);
+    
+    for (size_t i = 0; i < 0x50; i++) {
+        tprintf("%d: %s\n", i, sll_contains_val(myList, i) ? "False" : "True");
+        sll_remove_back(myList);
+        tprintf("%d: %s\n", i, sll_contains_val(myList, i) ? "False" : "True");
+    }
+    
+    SLL* newList = sll_new_v(5,
+        'A',
+        'l',
+        'e',
+        'x',
+        '\0'
+    );
+
+    sll_foreach(newList, list_lambda);
+    sll_destroy(newList);
+    sll_destroy(myList);
+
+    SLL* newerList = sll_new_v(5,
+        'P',
+        'o',
+        'l',
+        'y',
+        '\0'
+    );
+
+    newerList = sll_new_v(5,
+        'N',
+        'a',
+        'n',
+        'o',
+        '\0'
+    );
+
+    sll_foreach(newerList, list_lambda);
+
+    tputc('\n');
+
+    Queue* myQ = queue_new_empty();
+    queue_enqueue(myQ, "hello");
+    queue_enqueue(myQ, "there");
+    queue_enqueue(myQ, "how");
+    queue_enqueue(myQ, "are");
+    queue_enqueue(myQ, "you");
+    queue_enqueue(myQ, "?");
+
+    size_t len = queue_len(myQ);
+    for (size_t i = 0; i < len; i++)
+        tputs(queue_dequeue(myQ)), tputc(' ');
     
     return;
 }

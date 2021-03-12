@@ -1,11 +1,14 @@
 //Kernel Memory Manager
-//Basic slab allocator for kernel data structures
+//Slab allocator for kernel data structures
 
 #include <stddef.h>
 #include "vmm.h"
 #include "kmm.h"
 #include "mem.h"
 #include "panic.h"
+#include "util.h"
+#include "sll.h"
+#include "ht.h"
 
 static Obj_Cache caches[KERN_OBJ_NUM];
 static void* kmm_break = (void*)KERN_TOP;
@@ -57,27 +60,58 @@ void* kmalloc(kern_objs_e type)
     void* fetch = NULL;
 
     while (slab->state == SLAB_FULL) {
-        if (!slab->next)
-            goto new_slab;
-        slab = slab->next;
+        if (!slab->next) {
+            slab->next = slab_alloc(obj_sz, slab_sz);
+            slab = slab->next;
+            fetch = slab->last_free;
+            slab->last_free = *(slab->last_free);
+            slab->state = SLAB_PARTIAL;
+            return fetch;
+        } else
+            slab = slab->next;
     }
 
     fetch = slab->last_free;
     slab->last_free = *(slab->last_free);
-    slab->state = SLAB_PARTIAL;
     if (!slab->last_free)
         slab->state = SLAB_FULL;
-    goto end;
-
-    new_slab:
-    slab->next = slab_alloc(obj_sz, slab_sz);
-    slab = slab->next;
-    slab->state = SLAB_PARTIAL;
-    fetch = slab->last_free;
-    slab->last_free = *(slab->last_free);
-
-    end:
+    else
+        slab->state = SLAB_PARTIAL;
     return fetch;
+}
+
+//Frees a kernel object specified by type whose address is at ptr.
+//If ptr does not refer to a kernel object, does nothing and returns
+//-1. If ptr lies within an object slab but is not pointing to an 
+//allocated kernel object, it will result in undefined behavior,
+//which will almost certainly be fatal.
+int kfree(void* ptr, kern_objs_e type)
+{
+    if (type >= KERN_OBJ_NUM)
+        panic("Invalid Kernel object.");
+        
+    Slab* cur_slab = caches[type].slabs;
+    size_t algn, sz = caches[type].slab_sz;
+    void** nptr;
+
+    for (;
+        (size_t)cur_slab > (size_t)ptr && 
+        (size_t)cur_slab + (sz * PG_SIZE) < (size_t)ptr &&
+        cur_slab->next;
+        cur_slab = cur_slab->next
+    );
+
+    if ((size_t)cur_slab <= (size_t)ptr) {
+        if (cur_slab->state == SLAB_FREE)
+            return 0;
+        else {
+            nptr = ptr;
+            *nptr = cur_slab->last_free;
+            cur_slab->last_free = nptr;
+            cur_slab->state = SLAB_PARTIAL;
+        }
+    } else
+        return -1;
 }
 
 //Initializes the slab allocator.
@@ -86,14 +120,11 @@ void* kmalloc(kern_objs_e type)
 //in pages along with a pointer to the slab list itself.
 int kmm_init()
 {
+    new_cache(SLL_NODE, SLL_Node, 1);
+    new_cache(HASH_TAB, _Hash_Table, 1);
     new_cache(TEST_OBJ, test, 1);
     new_cache(TEST2_OBJ, test2, 3);
     new_cache(TEST3_OBJ, test3, 1);
 
-    return 0;
-}
-
-int kfree(void* ptr, kern_objs_e type)
-{
     return 0;
 }

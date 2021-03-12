@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include "gcc.h"
+#include "vmm.h"
 
 #define new_cache(num, obj, slab_size) \
     caches[num].slabs = slab_alloc(sizeof(obj), slab_size);\
@@ -10,6 +11,8 @@
     caches[num].slab_sz = slab_size; 
 
 typedef enum {
+    SLL_NODE,
+    HASH_TAB,
     TEST_OBJ,
     TEST2_OBJ,
     TEST3_OBJ,
@@ -53,5 +56,6 @@ typedef struct {
 int kmm_init();
 void* kbrk(pg_num_4k_t len);
 void* kmalloc(kern_objs_e type);
+int kfree(void* ptr, kern_objs_e type);
 
 #endif
