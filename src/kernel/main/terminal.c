@@ -6,9 +6,9 @@
 #include "terminal.h"
 #include "string.h"
 
-#define cursor_val (t_cursor[1] * VGA_COL_MAX) + t_cursor[0]
+#define cursor_val (t_cursor.row * VGA_COL_MAX) + t_cursor.col
 
-uint16_t t_cursor[2];
+Term_Cursor t_cursor;
 uint16_t vgamax;
 vga_attr term_color;
 
@@ -26,8 +26,8 @@ void clear_term(void)
     for (uint16_t i = 0; i < VGA_COL_MAX; i++) {
         clear_line(i);
     }
-    t_cursor[0] = 0;
-    t_cursor[1] = 0;
+    t_cursor.col = 0;
+    t_cursor.row = 0;
 }
 
 //scrolls terminal by 1 row
@@ -45,7 +45,7 @@ void tputc(char c)
 {
     switch (c) {
         case '\n':
-        t_cursor[0] = VGA_COL_MAX;
+        t_cursor.col = VGA_COL_MAX;
         break;
 
         case '\t':
@@ -59,16 +59,16 @@ void tputc(char c)
         if (c < 0x20)
             break;
         vga_putc(term_color, c, cursor_val);
-        t_cursor[0]++;
+        t_cursor.col++;
     }
     
     //handles new lines and scrolling
-    if (t_cursor[0] >= VGA_COL_MAX) {
-        t_cursor[0] = 0;
-        t_cursor[1]++;
+    if (t_cursor.col >= VGA_COL_MAX) {
+        t_cursor.col = 0;
+        t_cursor.row++;
     }
-    if (t_cursor[1] >= VGA_ROW_MAX) {
-        t_cursor[1] = VGA_ROW_MAX - 1;
+    if (t_cursor.row >= VGA_ROW_MAX) {
+        t_cursor.row = VGA_ROW_MAX - 1;
         term_scroll();
     }
 

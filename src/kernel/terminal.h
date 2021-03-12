@@ -41,6 +41,11 @@ typedef union {
     unsigned int x;
 } tf_arg;
 
+typedef struct {
+    uint16_t col;
+    uint16_t row;
+} Term_Cursor;
+
 void clear_term(void);
 void tputc(char c);
 void tcputc(vga_color bg, vga_color fg, char c);
