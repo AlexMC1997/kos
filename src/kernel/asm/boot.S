@@ -62,9 +62,9 @@ _build_dir_entry:
 
 //stack over bss
 .section .bss
-.align 16
+.align 0x1000
 stack_bottom:
-.skip 0x4000 //16 kb stack
+.skip 0x1000 //4 kb stack
 stack_top:
 
 //Kernel Entry - no interrupts, protected mode, paging enabled

@@ -23,6 +23,8 @@
 #define KERN_BASE 0xC0100000
 #define KERN_TOP 0xC0400000
 #define KERN_PD 0x0
+#define KERN_STACK 0xFFFFFFFF
+#define KERN_IDT 0x2000
 
 //Physical address of addr for Kernel memory between KERN_BASE and KERN_TOP
 #define phys(addr) (addr - 0xC0000000)

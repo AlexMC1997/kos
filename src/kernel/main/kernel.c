@@ -19,6 +19,20 @@
 #include "kmm.h"
 #include "sll.h"
 #include "queue.h"
+#include "stack.h"
+#include "kvm.h"
+#include "mem.h"
+#include "util.h"
+
+extern const GDT_Desc* GDT_DESCRIPT_PTR;
+
+Kernel the_kernel = {
+    .pd = KERN_PD,
+    .idt = KERN_IDT,
+    .gdt = NULL,
+    .stack_base = KERN_STACK,
+    .code_base = KERN_BASE,
+};
 
 //Initializes the exception system, including the PIC and interrupts
 void except_init()
@@ -38,6 +52,26 @@ void mem_init(size_t len, multiboot_mmap* m_mmap)
     tputs("Kernel memory map initialized.\n");
     pfa_init(kmmap_len, kmmap);
     tputs("Page Frame Allocator initialized.\n");
+}
+
+//Initializes the kernel's virtual memory space,
+//including its heap manager
+void kvm_init()
+{
+    decl_reg32(esp);
+    vmm_pd_vm_alloc(1, 0xFFFFF, (Alloc_Flags){1, 0, 0, 0}, the_kernel.pd);
+    PT_Entry* pt = pd_addr_p(the_kernel.pd + 0x3FF) << 12;
+
+    pt[0x3FF].addr_0_3 = phys(reg_esp) >> 12;
+    pt[0x3FF].addr_4_19 = phys(reg_esp) >> 16;
+    pt[0x3FF].valid = 1;
+    pt[0x3FF].present = 1;
+
+    reg_esp += 0xFFFFF000 - align(reg_esp, PG_SIZE);
+
+    the_kernel.gdt = GDT_DESCRIPT_PTR;
+
+    kmm_init();
 }
 
 static void list_lambda(SLL_Node* node)
@@ -89,8 +123,8 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
 
     except_init();
 
-    kmm_init();
-    tputs("Kernel Memory Manager initialized.\n");
+    kvm_init();
+    tputs("Kernel Memory initialized.\n");
 
     tprintf("%x\n", r_esp());
 
@@ -205,5 +239,19 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     for (size_t i = 0; i < len; i++)
         tputs(queue_dequeue(myQ)), tputc(' ');
     
+    Stack* myStack = stack_new_empty();
+
+    stack_push(myStack, "hello");
+    stack_push(myStack, "there");
+    stack_push(myStack, "how");
+    stack_push(myStack, "are");
+    stack_push(myStack, "you");
+    stack_push(myStack, "?");
+    tputc('\n');
+
+    len = stack_len(myStack);
+    for (size_t i = 0; i < len; i++)
+        tputs(stack_pop(myStack)), tputc(' ');
+
     return;
 }
