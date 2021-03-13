@@ -12,6 +12,10 @@
 #define mfence() asm volatile ("mfence":::"memory")
 #define pause() asm volatile ("pause":::"memory")
 
+#define decl_reg32(r) register uint32_t reg_##r asm("%"#r)
+#define decl_reg16(r) register uint16_t reg_##r asm("%"#r)
+#define decl_reg8(r) register uint8_t reg_##r asm("%"#r)
+
 //Returns the current value of the stack pointer
 static inline gcc_inline uint32_t r_esp() {
     register uint32_t reg_eax asm("%eax");

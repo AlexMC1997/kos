@@ -2,12 +2,13 @@
 #include "idt.h"
 #include "string.h"
 #include "terminal.h"
+#include "mem.h"
 
 extern const uint32_t _IVT_ENTRY_LEN; 
 extern const uintptr_t _IVT_START;
 
-idt_desc* idt_desc_ptr = (idt_desc*)0x2000;
-idt_entry IDT[256];
+IDT_Desc* idt_desc_ptr = (IDT_Desc*)KERN_IDT;
+IDT_Entry IDT[256];
 
 void idt_init()
 {
@@ -40,8 +41,8 @@ void idt_init()
         IDT[i].type = 0x6;
     }
 
-    idt_desc_ptr->length = 256 * sizeof(idt_entry);
+    idt_desc_ptr->length = 256 * sizeof(IDT_Entry);
     idt_desc_ptr->offset = (uint32_t)IDT;
 
-    asm volatile ("lidtl (0x2000)");
+    asm volatile ("lidtl (%c0)" : : "i"(KERN_IDT));
 }

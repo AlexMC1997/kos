@@ -1,3 +1,6 @@
+#ifndef _GDT_H
+#define _GDT_H
+
 #include <stdint.h>
 #include "gcc.h"
 
@@ -36,7 +39,7 @@ typedef struct {
     uint32_t ldt;
     uint32_t trap;
     uint32_t iomap_base;
-} gcc_packed tss_entry;
+} gcc_packed TSS_Entry;
 
 typedef struct {
     uint16_t limit_0_15;
@@ -54,12 +57,14 @@ typedef struct {
     uint8_t Sz : 1;
     uint8_t Gr : 1;
     uint8_t base_24_31;
-} gcc_packed gdt_entry;
+} gcc_packed GDT_Entry;
 
 typedef struct {
     uint16_t size;
-    const gdt_entry* offset;
-} gcc_packed gdt_descript;
+    const GDT_Entry* offset;
+} gcc_packed GDT_Desc;
 
 void tss_init();
 void tss_set_stack(uint32_t stack);
+
+#endif

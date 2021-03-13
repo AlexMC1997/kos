@@ -1,7 +1,7 @@
 #ifndef _UTIL_H
 #define _UTIL_H
 
-#define CHECK_TYPE(type, x) ({\ 
+#define check_type(type, x) ({\ 
     type _dummy;\ 
     typeof(x) _dummy2;\ 
     (void)(&_dummy == &_dummy2)\
@@ -9,6 +9,6 @@
 })
 
 //Aligns val to mod.
-#define ALIGN(val, mod) val - (val % mod)
+#define align(val, mod) (val - (val % mod))
 
 #endif
