@@ -124,7 +124,7 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     except_init();
 
     kvm_init();
-    tputs("Kernel Memory initialized.\n");
+    tputs("Kernel memory initialized.\n");
 
     tprintf("%x\n", r_esp());
 

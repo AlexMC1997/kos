@@ -14,7 +14,6 @@ typedef struct {
     void* stack_base;
     void* code_base;
     void* heap_base;
-    
 } Kernel;
 
 #endif

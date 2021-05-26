@@ -22,7 +22,7 @@ void trap(Trap_Frame tf)
 {
     switch (tf.trap_no) {
         case FLT_PF:
-        // tprintf("Page fault. Address: %x\n", r_cr2());
+        tprintf("Page fault. Address: %x\n", r_cr2());
         page_fault(&tf);
         break;
 
