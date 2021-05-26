@@ -8,9 +8,10 @@
 #include "panic.h"
 #include "util.h"
 #include "sll.h"
+#include "dll.h"
 #include "ht.h"
 
-static Obj_Cache caches[KERN_OBJ_NUM];
+static Cache_Header caches[KERN_OBJ_NUM];
 static void* kmm_break = (void*)KERN_TOP;
 
 //Expands Kernel heap by len 4k pages.
@@ -29,18 +30,20 @@ static Slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
     Slab* the_slab = kbrk(slab_sz);
     void* objs = &(the_slab->objs);
     void** tmp;
-    size_t i, end = (slab_sz * PG_SIZE) - sizeof(Slab) - 2*obj_sz;
     
     the_slab->last_free = (void**)objs;
     the_slab->next = NULL;
     the_slab->state = SLAB_FREE;
 
-    for (i = 0; i < end; i += obj_sz) {
+    if (PG_SIZE * slab_sz >= 2 * obj_sz) {
+        size_t i, end = (slab_sz * PG_SIZE) - (2 * obj_sz) - sizeof(Slab);
+        for (i = 0; i < end; i += obj_sz) {
+            tmp = objs + i;
+            *tmp = objs + i + obj_sz;
+        }
         tmp = objs + i;
-        *tmp = objs + i + obj_sz;
+        *tmp = NULL;
     }
-    tmp = objs + i;
-    *tmp = NULL;
     
     return the_slab;
 }
@@ -52,7 +55,7 @@ static Slab* slab_alloc(size_t obj_sz, pg_num_4k_t slab_sz)
 void* kmalloc(kern_objs_e type)
 {
     if (type >= KERN_OBJ_NUM)
-        panic("Invalid Kernel object.");
+        panic("Invalid Kernel object requested.");
 
     pg_num_4k_t slab_sz = caches[type].slab_sz;
     size_t obj_sz = caches[type].obj_sz;
@@ -114,13 +117,19 @@ int kfree(void* ptr, kern_objs_e type)
         return -1;
 }
 
-//Initializes the slab allocator.
+//Initializes the kernel's slab allocator.
 //Each kernel object needs a cache which stores
 //its size and the size of its corresponding slab
 //in pages along with a pointer to the slab list itself.
 int kmm_init()
 {
+    new_cache(MEM_256, Mem_256, 1);
+    new_cache(MEM_1K, Mem_1K, 1);
+    new_cache(MEM_4K, Mem_4K, 1);
+    new_cache(MEM_16K, Mem_16K, 4);
+    new_cache(MEM_64K, Mem_64K, 16);
     new_cache(SLL_NODE, SLL_Node, 1);
+    new_cache(DLL_NODE, DLL_Node, 1);
     new_cache(HASH_TAB, _Hash_Table, 1);
     new_cache(TEST_OBJ, test, 1);
     new_cache(TEST2_OBJ, test2, 3);
