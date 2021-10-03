@@ -25,6 +25,7 @@ SLL* sll_new(void* data)
     return head;
 }
 
+//Creates a new singly linked list containing no elements.
 SLL* sll_new_empty()
 {
     SLL_Node* head = kmalloc(SLL_NODE);
@@ -137,7 +138,7 @@ void* sll_remove_back(SLL* list)
 //Gets data from list ind list element.
 void* sll_get(SLL* list, size_t ind)
 {   
-    if (sll_len(list) < ind)
+    if (sll_len(list) <= ind)
         return NULL;
 
     SLL_Node* cur = list->next;
@@ -174,7 +175,18 @@ void* sll_find_obj(SLL* list, size_t n, void* obj)
     return cur->data;
 }
 
-//Deletes list from memory.
+//Operates on each element of the list with action.
+void sll_foreach(SLL* list, void (*action)(SLL_Node*))
+{
+    for (SLL_Node* cur = list->next; cur; cur = cur->next)
+        action(cur);
+}
+
+//Deletes list from memory. 
+//WARNING: If list contains pointers to objects,
+//the objects must be destroyed individually.
+//Use sll_destroy_p with a suitable destructor to dispose
+//of the list properly.
 void sll_destroy(SLL* list)
 {
     for (; (volatile size_t)(tail(list)->data); sll_remove_front(list));
@@ -183,14 +195,14 @@ void sll_destroy(SLL* list)
     kfree(list, SLL_NODE);
 }
 
-void sll_foreach(SLL* list, void (*action)(SLL_Node*))
+//Deletes list from memory, using destructor to clean stored objects. 
+void sll_destroy_p(SLL* list, void (*destructor)(SLL_Node*))
 {
-    SLL_Node* cur = list->next;
-
-    for (; cur; cur = cur->next)
-        action(cur);
+    sll_foreach(list, destructor);
+    sll_destroy(list);
 }
 
+//Converts list to an array located at arr.
 void sll_to_array(SLL* list, void** arr)
 {
     SLL_Node* cur = list->next;

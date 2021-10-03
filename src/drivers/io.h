@@ -13,23 +13,15 @@
 #define mfence() asm volatile ("mfence":::"memory")
 #define pause() asm volatile ("pause":::"memory")
 
-//Declares a 32 bit regiter named reg_r
-#define decl_reg32(r) register uint32_t reg_##r asm("%"#r)
-//Declares a 16 btt register named reg_r
-#define decl_reg16(r) register uint16_t reg_##r asm("%"#r)
-//Declares an 8 bit regisster named reg_r or reg_r
-#define decl_reg8(r) register uint8_t reg_##r asm("%"#r)
-
 //Returns the current value of the stack pointer
 static inline gcc_inline uint32_t r_esp() {
-    decl_reg32(eax);
-    asm volatile ("movl %esp, %eax"); 
-    return reg_eax; 
+    register uint32_t reg_esp asm("%esp");
+    return reg_esp; 
 }
 
 //Returns the current value of the CR2 register
 static inline gcc_inline uint32_t r_cr2() {
-    decl_reg32(eax);
+    register uint32_t reg_eax asm("%eax");
     asm volatile ("movl %cr2, %eax"); 
     return reg_eax; 
 }

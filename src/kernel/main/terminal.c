@@ -173,7 +173,7 @@ void tprintf(const char* format, ...)
                 tputc('0');
                 tputc('x');
 
-                for (; !((arg.x >> tmp) & 0xF); tmp -= 4);
+                for (; !((arg.x >> tmp) & 0xF) && tmp; tmp -= 4);
                 for (; tmp + 4; tmp-=4) {
                     tmp2 = (arg.x >> tmp) & 0xF;
                     if (tmp2 > 9)
@@ -209,26 +209,6 @@ int8_t terminal_init(void)
     term_color = vga_char_attr(VGA_BLACK, VGA_WHITE);
 
     clear_term();
-    goto notest;
-    
-    //TESTING
-    vga_color clr = VGA_WHITE;
-    bool b = false;
-    for (;;) {
-        term_color = vga_char_attr(VGA_BLACK, clr);
-        if (clr == 15)
-            clr = 0;
-        clr++;
-        if (b) {
-            tputc('\n');
-            b = false;
-        } else {
-            tputs("Testing!");
-            b = true;
-        }
-    }
-
-    notest:
     term_initialized = 1;
     tputs("Terminal initialized.\n");
 

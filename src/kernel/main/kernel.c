@@ -58,7 +58,7 @@ void mem_init(size_t len, multiboot_mmap* m_mmap)
 //including its heap manager
 void kvm_init()
 {
-    decl_reg32(esp);
+    register uint32_t reg_esp asm("%esp");
     vmm_pd_vm_alloc(1, 0xFFFFF, (Alloc_Flags){1, 0, 0, 0}, the_kernel.pd);
     PT_Entry* pt = pd_addr_p(the_kernel.pd + 0x3FF) << 12;
 
@@ -105,6 +105,11 @@ static int pfa_testing()
     }
 
     return 0;
+}
+
+void destructor(SLL_Node* node) 
+{
+    kfree(node->data, TEST3_OBJ);
 }
 
 //Kernel C entry; passed GRUB info for parsing
@@ -207,7 +212,8 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     sll_destroy(newList);
     sll_destroy(myList);
 
-    SLL* newerList = sll_new_v(5,
+    SLL* newerList = sll_new_v(
+        5,
         'P',
         'o',
         'l',
@@ -215,7 +221,8 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
         '\0'
     );
 
-    newerList = sll_new_v(5,
+    newerList = sll_new_v(
+        5,
         'N',
         'a',
         'n',
@@ -252,6 +259,19 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     len = stack_len(myStack);
     for (size_t i = 0; i < len; i++)
         tputs(stack_pop(myStack)), tputc(' ');
+    
+    Queue* myQueue = queue_new_empty();
+
+    for (size_t i = 0; i < 100; i++)
+        queue_enqueue(myQueue, kmalloc(TEST3_OBJ));
+
+    tprintf("%x\n", queue_peek(myQueue));
+    queue_destroy_p(myQueue, destructor);
+
+    myQueue = queue_new_empty();
+    queue_enqueue(myQueue, kmalloc(TEST3_OBJ));
+    tprintf("%x\n", queue_peek(myQueue));
+    tprintf("%x\n", queue_dequeue(myQueue));
 
     return;
 }
