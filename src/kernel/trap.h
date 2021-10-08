@@ -21,6 +21,14 @@ typedef enum {
     FLT_SSF,
     FLT_GPF,
     FLT_PF,
+    FLT_RESERVED,
+    FLT_FPE,
+    FLT_ALGN_CHK,
+    ABRT_MACHINE_CHK,
+    FLT_SIMD,
+    FLT_VIRT_EX,
+    FLT_RESERVED2,
+    FLT_SEC_EX
 } trap_no_e;
 
 typedef struct {

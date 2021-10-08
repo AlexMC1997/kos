@@ -47,6 +47,8 @@ typedef struct {
     uint16_t row;
 } Term_Cursor;
 
+extern bool term_initialized;
+
 void clear_term(void);
 void tputc(char c);
 void tcputc(vga_color bg, vga_color fg, char c);
