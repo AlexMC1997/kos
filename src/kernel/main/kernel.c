@@ -43,6 +43,7 @@ void except_init()
     tputs("PIC initialized\n");
     tss_init();
     tputs("TSS initialized\n");
+    sti();
 }
 
 //Initializes physical memory, including the Page Frame Allocator
@@ -125,15 +126,11 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     mem_init(mbi->mmap_length, mbi->mmap_addr);
     acpi_init();
 
-
     except_init();
 
     kvm_init();
     tputs("Kernel memory initialized.\n");
 
-    tprintf("%x\n", r_esp());
-
-    // pfa_testing();
     test* arr[30];
 
     for (int i = 0; i < 9; i++) {
