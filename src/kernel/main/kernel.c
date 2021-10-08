@@ -113,24 +113,8 @@ void destructor(SLL_Node* node)
     kfree(node->data, TEST3_OBJ);
 }
 
-//Kernel C entry; passed GRUB info for parsing
-void kern_main(uint32_t magic, multiboot_info* mbi)
+void kmm_testing()
 {
-    if (magic != MULTIBOOT_MAGIC)
-        panic("Multiboot magic mismatch.");
-
-    vga_text_init();
-    terminal_init();
-
-    cpu_init();
-    mem_init(mbi->mmap_length, mbi->mmap_addr);
-    acpi_init();
-
-    except_init();
-
-    kvm_init();
-    tputs("Kernel memory initialized.\n");
-
     test* arr[30];
 
     for (int i = 0; i < 9; i++) {
@@ -269,6 +253,27 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     queue_enqueue(myQueue, kmalloc(TEST3_OBJ));
     tprintf("%x\n", queue_peek(myQueue));
     tprintf("%x\n", queue_dequeue(myQueue));
+}
+
+//Kernel C entry; passed GRUB info for parsing
+void kern_main(uint32_t magic, multiboot_info* mbi)
+{
+    if (magic != MULTIBOOT_MAGIC)
+        panic("Multiboot magic mismatch.");
+
+    vga_text_init();
+    terminal_init();
+
+    cpu_init();
+    mem_init(mbi->mmap_length, mbi->mmap_addr);
+    acpi_init();
+
+    except_init();
+
+    kvm_init();
+    tputs("Kernel memory initialized.\n");
+
+    kmm_testing();
 
     return;
 }
