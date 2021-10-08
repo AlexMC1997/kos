@@ -1,3 +1,6 @@
+#ifndef _GDT_H
+#define _GDT_H
+
 #include <stdint.h>
 #include "gcc.h"
 
@@ -8,7 +11,7 @@
 #define GDT_UDATA_SEG 0x20
 #define GDT_TASK_SEG 0x28
 
-struct tss_entry {
+typedef struct {
     uint32_t prev;
     uint32_t esp0;
     uint32_t ss0;
@@ -36,9 +39,9 @@ struct tss_entry {
     uint32_t ldt;
     uint32_t trap;
     uint32_t iomap_base;
-} gcc_packed;
+} gcc_packed TSS_Entry;
 
-struct gdt_entry {
+typedef struct {
     uint16_t limit_0_15;
     uint16_t base_0_15;
     uint8_t base_16_23;
@@ -54,12 +57,14 @@ struct gdt_entry {
     uint8_t Sz : 1;
     uint8_t Gr : 1;
     uint8_t base_24_31;
-} gcc_packed;
+} gcc_packed GDT_Entry;
 
-struct gdt_descript {
+typedef struct {
     uint16_t size;
-    const struct gdt_entry* offset;
-} gcc_packed;
+    const GDT_Entry* offset;
+} gcc_packed GDT_Desc;
 
 void tss_init();
 void tss_set_stack(uint32_t stack);
+
+#endif

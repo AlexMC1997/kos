@@ -6,20 +6,23 @@
 
 #define KMMAP_LEN 20
 
-typedef enum __mem_type {
+typedef enum {
     MEM_FREE = 1,
     MEM_RESERVED,
     MEM_ACPI,
     MEM_PRESERVED,
     MEM_BAD
-} mem_type;
+} Mem_Type;
 
-typedef struct __memarea {
-    mem_type type;
+typedef struct {
+    Mem_Type type;
     size_t size;
     void* addr;
-} memarea;
+} Memarea;
 
-memarea* kmmap_init(multiboot_mmap* m_mmap, size_t len);
+extern Memarea kmmap[KMMAP_LEN];
+extern size_t kmmap_len;
+
+void kmmap_init(size_t len, multiboot_mmap* m_mmap);
 
 #endif

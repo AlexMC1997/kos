@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifndef __VGA_COLOR_ENUM
 #define __VGA_COLOR_ENUM

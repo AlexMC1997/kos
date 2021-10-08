@@ -7,7 +7,7 @@
 #include "io.h"
 #include "terminal.h"
 
-struct gdt_entry GDT[] = {
+GDT_Entry GDT[] = {
     { //NULL segment
         .limit_0_15 =   0,
         .base_0_15 = 0,
@@ -94,7 +94,7 @@ struct gdt_entry GDT[] = {
         .base_24_31 = 0
     },
     { //Task State Selector
-        .limit_0_15 =  0xFFFF & sizeof(struct tss_entry),
+        .limit_0_15 =  0xFFFF & sizeof(TSS_Entry),
         .base_0_15 = 0,
         .base_16_23 = 0,
         .Ac =    1, //TSS not LDT
@@ -104,7 +104,7 @@ struct gdt_entry GDT[] = {
         .S =     0, 
         .Privl = 0,
         .Pr =    1,
-        .limit_16_19 = sizeof(struct tss_entry) >> 16,
+        .limit_16_19 = sizeof(TSS_Entry) >> 16,
         .none = 0,
         .Sz = 1,
         .Gr = 0,
@@ -112,10 +112,10 @@ struct gdt_entry GDT[] = {
     }
 };
 
-const struct gdt_descript GDT_DESCRIPT = { (6*sizeof(struct gdt_entry))-1, GDT };
-const struct gdt_descript* GDT_DESCRIPT_PTR = &GDT_DESCRIPT;
+const GDT_Desc GDT_DESCRIPT = { (6*sizeof(GDT_Entry))-1, GDT };
+const GDT_Desc* GDT_DESCRIPT_PTR = &GDT_DESCRIPT;
 
-struct tss_entry tss;
+TSS_Entry tss;
 
 void tss_init()
 {
@@ -123,11 +123,9 @@ void tss_init()
     GDT[5].base_16_23 = ((uint32_t)(&tss) >> 16) & 0xFF;
     GDT[5].base_24_31 = ((uint32_t)(&tss) >> 24) & 0xFF;
 
-    tss.ss0 = 0x10; //kernel data segment
+    tss.ss0 = GDT_KDATA_SEG;
 
     asm volatile ("movw $0x28, %%ax; ltr %%ax" : : : "ax");
-
-    tputs("TSS initialized.\n");
 }
 
 void tss_set_stack(uint32_t stack)

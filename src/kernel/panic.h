@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-typedef enum __panic_video {
+typedef enum {
     VGA_TEXT
-} panic_video;
+} panic_video_e;
 
 extern uint8_t PANIC_VIDEO_MODE;
 void panic(char* panicmsg);

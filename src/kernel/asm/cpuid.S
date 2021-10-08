@@ -19,7 +19,8 @@ _check_cpuid:
 .type _get_cpuid, @function
 _get_cpuid:
     push %edi
-    movl 8(%esp), %edi
+    push %ebx
+    movl 12(%esp), %edi
     xorl %eax, %eax
     cpuid
     movl %ebx, (%edi)
@@ -32,6 +33,7 @@ _get_cpuid:
     movl %ebx, 17(%edi)
     movl %ecx, 21(%edi)
     movl %edx, 25(%edi)
+    pop %ebx
     pop %edi
     ret
 .size _get_cpuid, . - _get_cpuid
