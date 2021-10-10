@@ -41,4 +41,8 @@ qemu-gdb: build
 
 clean:
 	-safe-rm $(BIN_DIR)*.bin $(DUMP_DIR)*.asm 2>/dev/null
-	-safe-rm -r $(OBJ_DIR)/* 2>/dev/null
+	-find $(OBJ_DIR) -name "*.o" -type f -print0 | xargs -0 safe-rm
+
+clean-all:
+	-safe-rm $(BIN_DIR)*.bin $(DUMP_DIR)*.asm 2>/dev/null
+	-find $(OBJ_DIR) -type f -print0 | xargs -0 safe-rm

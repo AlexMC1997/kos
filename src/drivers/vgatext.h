@@ -7,8 +7,8 @@
 typedef uint8_t vga_attr;
 typedef uint16_t vga_char;
 
-extern const uint8_t VGA_COL_MAX;
-extern const uint8_t VGA_ROW_MAX;
+extern const int8_t VGA_COL_MAX;
+extern const int8_t VGA_ROW_MAX;
 extern const uintptr_t VGA_START;
 extern const uintptr_t VGA_END;
 

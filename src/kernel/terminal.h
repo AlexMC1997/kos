@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include "ps2_kb.h"
+
+#define TERM_SCANNER_BUF_SZ 512
 
 #ifndef __VGA_COLOR_ENUM
 #define __VGA_COLOR_ENUM
@@ -43,9 +46,17 @@ typedef union {
 } tf_arg;
 
 typedef struct {
-    uint16_t col;
-    uint16_t row;
+    int16_t col;
+    int16_t row;
 } Term_Cursor;
+
+struct Term_Scanner {
+    bool scanning;
+    uint16_t buf_ind;
+    e_ps2_mods mods;
+    e_ps2_locks locks;
+    char buffer[TERM_SCANNER_BUF_SZ];
+};
 
 extern bool term_initialized;
 
@@ -56,6 +67,9 @@ void tputs(const char* s);
 void tcputs(vga_color bg, vga_color fg, const char* s);
 void twrite(const char* s, size_t len);
 void tprintf(const char* format, ...);
+void ttake_key(PS2_Key_Info key_info);
+size_t tgets(size_t max, char* restrict buf);
+char tgetc();
 int8_t terminal_init(void);
 
 #endif

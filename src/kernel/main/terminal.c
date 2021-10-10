@@ -2,23 +2,30 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include "vgatext.h"
 #include "terminal.h"
-#include "string.h"
+#include "queue.h"
+#include "kmm.h"
+#include "io.h"
 
 #define cursor_val (t_cursor.row * VGA_COL_MAX) + t_cursor.col
 
+static Term_Cursor t_cursor;
+static uint16_t vgamax;
+static vga_attr term_color;
+
+static struct Term_Scanner scanner;
+static Queue* key_queue;
+
 extern bool term_initialized = false;
-Term_Cursor t_cursor;
-uint16_t vgamax;
-vga_attr term_color;
 
 //clears one row of the terminal; begins at 0
 void clear_line(uint16_t row)
 {
     uint16_t end = ((row + 1) * VGA_COL_MAX);
     for (uint16_t i = row * VGA_COL_MAX; i < end; i++) {
-        vga_putc(term_color, ' ', i);
+        vga_putc(vga_char_attr(VGA_BLACK, VGA_WHITE), ' ', i);
     }
 }
 //clears terminal screen
@@ -56,6 +63,12 @@ void tputc(char c)
         tputc(' ');
         break;
 
+        case '\b':
+        t_cursor.col--;
+        if (t_cursor.col + 1)
+            vga_putc(term_color, ' ', cursor_val);
+        break;
+
         default:
         if (c < 0x20)
             break;
@@ -67,6 +80,10 @@ void tputc(char c)
     if (t_cursor.col >= VGA_COL_MAX) {
         t_cursor.col = 0;
         t_cursor.row++;
+    } else if (t_cursor.col < 0) {
+        t_cursor.col = 0;
+        if (t_cursor.row)
+            t_cursor.row--;
     }
     if (t_cursor.row >= VGA_ROW_MAX) {
         t_cursor.row = VGA_ROW_MAX - 1;
@@ -203,10 +220,122 @@ void tprintf(const char* format, ...)
     va_end(vl);
 }
 
+//scans keys from keyboard into the terminal and into a buffer
+void tscan_line()
+{
+    vga_enable_cursor();
+    volatile bool scanning;
+    scanner.scanning = true;
+    PS2_Key_Info* ptr;
+    while (scanning = scanner.scanning) {
+        cli();
+        if (queue_len(key_queue)) {
+            ptr = queue_dequeue(key_queue);
+            tscan_key(*ptr, PS2_K_ENTER);
+            kfree(ptr, MEM_256);
+        }
+        sti();
+    }
+
+    while (ptr = queue_dequeue(key_queue))
+        kfree(ptr, MEM_256);
+    vga_disable_cursor();
+}
+
+//takes a key from keyboard into the key queue
+void ttake_key(PS2_Key_Info key_info) {
+    if (scanner.scanning) {
+        PS2_Key_Info* key = kmalloc(MEM_256);
+        *key = key_info;
+        queue_enqueue(key_queue, key);
+    }
+}
+
+//parses a key into characters for input into terminal and buffer
+void tscan_key(PS2_Key_Info key_info, e_ps2_keys terminator)
+{
+    char in;
+    if (!key_info.released) {
+        if (key_info.key == terminator)
+            scanner.scanning = false;
+        if (key_info.ascii) {
+            in = key_info.ascii;
+            tputc(in);
+        } else switch (key_info.key) {
+            case PS2_K_ENTER:
+            case PS2_K_NUM_ENTER:
+            in = '\n';
+            tputc(in);
+            break;
+
+            case PS2_K_TAB:
+            in = '\t';
+            tputc(in);
+            break;
+
+            case PS2_K_BACK:
+            if (scanner.buf_ind) {
+                in = '\b';
+                tputc(in);
+                scanner.buf_ind--;
+                if (scanner.buffer[scanner.buf_ind] == '\t') {
+                    tputc(in);
+                    tputc(in);
+                    tputc(in);
+                }
+                scanner.buffer[scanner.buf_ind] = ' ';
+            }
+            default:
+            return;
+        }
+
+        if (scanner.buf_ind < TERM_SCANNER_BUF_SZ) {
+            scanner.buffer[scanner.buf_ind] = in;
+            scanner.buf_ind++;
+        }
+    } else {
+        return;
+    }
+}
+
+void clear_scanner()
+{
+    scanner.buf_ind = 0;
+    scanner.scanning = false;
+    scanner.locks = 0;
+    scanner.mods = 0;
+    memset(scanner.buffer, '\0', 512);
+}
+
+//Gets a character string of up to max size from the user.
+//Terminated by new line character
+size_t tgets(size_t max, char* restrict buf)
+{
+    tscan_line();
+    size_t n = max > scanner.buf_ind ? scanner.buf_ind : max;
+    memcpy(buf, scanner.buffer, n);
+    clear_scanner();
+    return n;
+}
+
+//Gets a character from the user.
+char tgetc()
+{
+    tscan_line();
+    char c = scanner.buffer[0];
+    clear_scanner();
+    return c;
+}
+
 //initializes terminal
-int8_t terminal_init(void)
+int8_t terminal_init()
 {
     term_color = vga_char_attr(VGA_BLACK, VGA_WHITE);
+
+    scanner.buf_ind = 0;
+    scanner.scanning = false;
+    memset(scanner.buffer, '\0', 512);
+    key_queue = queue_new_empty();
 
     clear_term();
     term_initialized = true;

@@ -23,6 +23,7 @@
 #include "kvm.h"
 #include "mem.h"
 #include "util.h"
+#include "ps2.h"
 
 extern const GDT_Desc* GDT_DESCRIPT_PTR;
 
@@ -38,11 +39,8 @@ Kernel the_kernel = {
 void except_init()
 {
     idt_init();
-    tputs("IDT initialized\n");
     pic_init();
-    tputs("PIC initialized\n");
     tss_init();
-    tputs("TSS initialized\n");
     sti();
 }
 
@@ -50,9 +48,7 @@ void except_init()
 void mem_init(size_t len, multiboot_mmap* m_mmap)
 {
     kmmap_init(len, m_mmap);
-    tputs("Kernel memory map initialized.\n");
     pfa_init(kmmap_len, kmmap);
-    tputs("Page Frame Allocator initialized.\n");
 }
 
 //Initializes the kernel's virtual memory space,
@@ -73,6 +69,14 @@ void kvm_init()
     the_kernel.gdt = GDT_DESCRIPT_PTR;
 
     kmm_init();
+}
+
+//Initializes IO and other devices
+void dev_init()
+{
+    vga_text_init();
+    ps2_init();
+    ps2_kb_init();
 }
 
 static void list_lambda(SLL_Node* node)
@@ -261,19 +265,27 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
     if (magic != MULTIBOOT_MAGIC)
         panic("Multiboot magic mismatch.");
 
-    vga_text_init();
-    terminal_init();
 
     cpu_init();
     mem_init(mbi->mmap_length, mbi->mmap_addr);
     acpi_init();
 
     except_init();
-
     kvm_init();
-    tputs("Kernel memory initialized.\n");
 
-    kmm_testing();
+    dev_init();
+    terminal_init();
+
+    // kmm_testing();
+
+    char buf[121];
+    for (vga_color color = VGA_BLUE;;color++) {
+        if (color > VGA_WHITE)
+            color = VGA_BLUE;
+        size_t how_many = tgets(120, buf);
+        buf[how_many] = '\0';
+        tcputs(VGA_BLACK, color, buf);
+    }
 
     return;
 }

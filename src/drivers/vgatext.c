@@ -33,6 +33,11 @@ void vga_disable_cursor(void)
     vga_crtc_write(REG_CURSOR_START, 0x20);
 }
 
+void vga_enable_cursor(void)
+{
+    vga_crtc_write(REG_CURSOR_START, 0x0);
+}
+
 //Enable/disable underline flag on text attribute
 void vga_disable_underline(void)
 {

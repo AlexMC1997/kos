@@ -7,8 +7,8 @@
 #include "string.h"
 #include "gdt.h"
 #include "pic.h"
-
-extern void _err_detrap_as();
+#include "ps2.h"
+#include "ps2_kb.h"
 
 void page_fault(Trap_Frame* tf)
 {
@@ -21,19 +21,29 @@ void page_fault(Trap_Frame* tf)
     }
 }
 
+void keyboard_int()
+{
+    PS2_Key_Info info;
+    ps2_kb_get_key(&info);
+
+    //temporary - sends key directly to terminal
+    ttake_key(info);
+
+    pic_eoi(1);
+}
+
 //C entry point for all exceptions.
 int trap(Trap_Frame tf)
 {
     switch (tf.trap_no) {
         case FLT_PF:
-        tprintf("Page fault. Address: %x\n", r_cr2());
         page_fault(&tf);
         return -1;
         break;
         
         case 0x21:
-        tprintf("KB interrupt: %u\n", tf.trap_no);
-        pic_eoi(1);
+        keyboard_int();
+        return 0;
         break;
 
         case ABRT_DOUBLE_FAULT:
@@ -48,7 +58,6 @@ int trap(Trap_Frame tf)
 
         default:
         pic_eoi(15);
-        tprintf("Exception #: %u\n", tf.trap_no);
+        tprintf("Unhandled exception. Exception #: %u\n", tf.trap_no);
     }
-    return 0;
 }

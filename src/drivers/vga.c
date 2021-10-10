@@ -12,8 +12,8 @@
 //do not change port numbers
 struct vga_device vga;
 
-const uint8_t VGA_COL_MAX = 80;
-const uint8_t VGA_ROW_MAX = 25;
+const int8_t VGA_COL_MAX = 80;
+const int8_t VGA_ROW_MAX = 25;
 const uintptr_t VGA_START = 0xB8000;
 const uintptr_t VGA_END = 0xBFFFF;
 
