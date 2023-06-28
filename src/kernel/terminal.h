@@ -30,6 +30,11 @@ typedef enum __vga_color {
 } vga_color;
 #endif
 
+typedef enum term_char_cmd {
+    CHAR_CMD_LEFT = (char)-2,
+    CHAR_CMD_RIGHT = (char)-3
+} e_term_char_cmd;
+
 typedef union {
     char dhh;
     unsigned char uhh;

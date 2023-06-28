@@ -16,7 +16,8 @@ void page_fault(Trap_Frame* tf)
     if (!code->user) {
         uintptr_t va = r_cr2();
         PD_Entry* pd = KERN_PD;
-        PT_Entry* pt = (PT_Entry*)(pd_addr_v(pd[va >> 22]) << 12);
+        uintptr_t tmp = va >> 22;
+        PT_Entry* pt = (PT_Entry*)(pd_addr_v(pd[tmp]) << 12);
         vmm_pg_alloc_4k(pt, va >> 12, 1);
     }
 }
@@ -27,7 +28,8 @@ void keyboard_int()
     ps2_kb_get_key(&info);
 
     //temporary - sends key directly to terminal
-    ttake_key(info);
+    if (info.key != -1)
+        ttake_key(info);
 
     pic_eoi(1);
 }

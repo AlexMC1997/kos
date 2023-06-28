@@ -24,6 +24,7 @@
 #include "mem.h"
 #include "util.h"
 #include "ps2.h"
+#include "console.h"
 
 extern const GDT_Desc* GDT_DESCRIPT_PTR;
 
@@ -278,14 +279,7 @@ void kern_main(uint32_t magic, multiboot_info* mbi)
 
     // kmm_testing();
 
-    char buf[121];
-    for (vga_color color = VGA_BLUE;;color++) {
-        if (color > VGA_WHITE)
-            color = VGA_BLUE;
-        size_t how_many = tgets(120, buf);
-        buf[how_many] = '\0';
-        tcputs(VGA_BLACK, color, buf);
-    }
+    console_main();
 
     return;
 }

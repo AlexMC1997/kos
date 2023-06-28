@@ -63,6 +63,14 @@ void tputc(char c)
         tputc(' ');
         break;
 
+        case CHAR_CMD_LEFT:
+        t_cursor.col--;
+        break;
+        
+        case CHAR_CMD_RIGHT:
+        t_cursor.col++;
+        break;
+
         case '\b':
         t_cursor.col--;
         if (t_cursor.col + 1)
@@ -272,6 +280,88 @@ void tscan_key(PS2_Key_Info key_info, e_ps2_keys terminator)
             in = '\t';
             tputc(in);
             break;
+
+            case PS2_K_LEFT:
+            if (scanner.buf_ind) {
+                if (key_info.mods & (PS2_K_LCTRL | PS2_K_RCTRL)) {
+                    if (scanner.buffer[scanner.buf_ind - 1] == ' ' || scanner.buffer[scanner.buf_ind - 1] == '\t') {
+                        while (scanner.buffer[scanner.buf_ind - 1] == ' ' 
+                        || scanner.buffer[scanner.buf_ind - 1] == '\t'
+                        ) {
+                            tputc(CHAR_CMD_LEFT);
+                            scanner.buf_ind--;
+                            if (scanner.buffer[scanner.buf_ind] == '\t') {
+                                tputc(CHAR_CMD_LEFT);
+                                tputc(CHAR_CMD_LEFT);
+                                tputc(CHAR_CMD_LEFT);
+                            }
+                        } 
+                    } else {
+                        while (scanner.buffer[scanner.buf_ind - 1] != ' ' 
+                            && scanner.buffer[scanner.buf_ind - 1] != '\t'
+                            && scanner.buffer[scanner.buf_ind - 1] != '\0'
+                        ) {
+                            tputc(CHAR_CMD_LEFT);
+                            scanner.buf_ind--;
+                            if (scanner.buffer[scanner.buf_ind] == '\t') {
+                                tputc(CHAR_CMD_LEFT);
+                                tputc(CHAR_CMD_LEFT);
+                                tputc(CHAR_CMD_LEFT);
+                            }
+                        }
+                    }
+                } else {
+                    tputc(CHAR_CMD_LEFT);
+                    scanner.buf_ind--;
+                    if (scanner.buffer[scanner.buf_ind] == '\t') {
+                        tputc(CHAR_CMD_LEFT);
+                        tputc(CHAR_CMD_LEFT);
+                        tputc(CHAR_CMD_LEFT);
+                    }
+                }
+            }
+            return;
+
+            case PS2_K_RIGHT:
+            if (scanner.buffer[scanner.buf_ind]) {
+                if (key_info.mods & (PS2_K_LCTRL | PS2_K_RCTRL)) {
+                    if (scanner.buffer[scanner.buf_ind + 1] == ' ' || scanner.buffer[scanner.buf_ind + 1] == '\t') {
+                        while (scanner.buffer[scanner.buf_ind + 1] == ' ' 
+                        || scanner.buffer[scanner.buf_ind + 1] == '\t'
+                        ) {
+                            tputc(CHAR_CMD_RIGHT);
+                            scanner.buf_ind++;
+                            if (scanner.buffer[scanner.buf_ind] == '\t') {
+                                tputc(CHAR_CMD_RIGHT);
+                                tputc(CHAR_CMD_RIGHT);
+                                tputc(CHAR_CMD_RIGHT);
+                            }
+                        } 
+                    } else {
+                        while (scanner.buffer[scanner.buf_ind + 1] != ' ' 
+                            && scanner.buffer[scanner.buf_ind + 1] != '\t'
+                            && scanner.buffer[scanner.buf_ind + 1] != '\0'
+                        ) {
+                            tputc(CHAR_CMD_RIGHT);
+                            scanner.buf_ind++;
+                            if (scanner.buffer[scanner.buf_ind] == '\t') {
+                                tputc(CHAR_CMD_RIGHT);
+                                tputc(CHAR_CMD_RIGHT);
+                                tputc(CHAR_CMD_RIGHT);
+                            }    
+                        }
+                    }
+                } else {
+                    tputc(CHAR_CMD_RIGHT);
+                    scanner.buf_ind++;
+                    if (scanner.buffer[scanner.buf_ind] == '\t') {
+                        tputc(CHAR_CMD_RIGHT);
+                        tputc(CHAR_CMD_RIGHT);
+                        tputc(CHAR_CMD_RIGHT);
+                    }
+                }
+            }
+            return;
 
             case PS2_K_BACK:
             if (scanner.buf_ind) {

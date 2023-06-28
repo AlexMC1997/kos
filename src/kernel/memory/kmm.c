@@ -68,7 +68,10 @@ void* kmalloc(kern_objs_e type)
             slab = slab->next;
             fetch = slab->last_free;
             slab->last_free = *(slab->last_free);
-            slab->state = SLAB_PARTIAL;
+            if (!slab->last_free)
+                slab->state = SLAB_FULL;
+            else
+                slab->state = SLAB_PARTIAL;
             return fetch;
         } else
             slab = slab->next;

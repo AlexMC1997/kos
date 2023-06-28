@@ -56,5 +56,6 @@ typedef struct {
 
 void pfa_init(size_t kmmap_len, Memarea* kmmap);
 int pfa_pf_alloc(PF_Size sz, pg_num_4k_t* ptr);
+size_t pfa_memstat();
 
 #endif

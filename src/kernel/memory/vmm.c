@@ -124,8 +124,7 @@ int vmm_pd_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PD_Ent
     cur_pg = addr % (PG_SIZE / 4);
     cur_len = len;
     pd_ind = addr >> 10;
-    pd_len = len;
-    pd_len = pd_len & 0x3FF ? pd_len + 0x400 : pd_len; //round up
+    pd_len = len & 0x3FF ? len + 0x400 : len; //round up
     pd_len >>= 10;
     
     pd_end = pd_ind + pd_len;
@@ -156,10 +155,10 @@ int vmm_pd_vm_alloc(pg_num_4k_t len, pg_num_4k_t addr, Alloc_Flags flags, PD_Ent
             pd_ptr[pd_ind].write = flags.write;
             pd_ptr[pd_ind].valid = 1;
         }
+        pg_num_4k_t run_len = (PG_SIZE / 4) - cur_pg;
+        vmm_pt_vm_alloc(cur_len > run_len ? run_len : cur_len, cur_pg, flags, cur_pt);
 
-        vmm_pt_vm_alloc(cur_len % (PG_SIZE / 4), cur_pg, flags, cur_pt);
-
-        cur_len -= (PG_SIZE / 4) - cur_pg;
+        cur_len -= run_len;
         cur_pg = 0;
     }
 

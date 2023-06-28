@@ -103,6 +103,7 @@ typedef enum ps2_keys {
     PS2_K_LALT,
     PS2_K_SPACE,
     PS2_K_RALT,
+    PS2_K_RWIN,
     PS2_K_MENUS,
     PS2_K_RCTRL,
     PS2_K_LEFT,

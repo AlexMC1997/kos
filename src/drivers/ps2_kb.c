@@ -1,5 +1,6 @@
 #include "ps2.h"
 #include "ps2_kb.h"
+#include "panic.h"
 
 extern PS2_Tab_Entry PS2_TABLE[];
 extern char PS2_ASCII_TABLE[];
@@ -53,7 +54,11 @@ void ps2_kb_get_key(PS2_Key_Info* key_info)
         }
     }
     e_ps2_keys key = 0;
-    for (; key <= PS2_K_NUM_PERIOD; key++) {
+    for (; key <= PS2_K_DELIMIT; key++) {
+        if (key == PS2_K_DELIMIT) {
+            key_info->key = -1;
+            return;
+        }
         if (
             PS2_TABLE[key].code[0] == scan_code.code[0]
             && PS2_TABLE[key].code[1] == scan_code.code[1]

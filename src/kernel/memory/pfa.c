@@ -158,8 +158,7 @@ int pfa_pf_alloc(PF_Size sz, pg_num_4k_t* ptr)
         //If somehow the stack is empty, pull from reservoir
         if (!stack_4k_ptr)
             fetch_pg_4k(ptr);
-        else
-            *ptr = stack_pg_4k[--stack_4k_ptr];
+        *ptr = stack_pg_4k[--stack_4k_ptr];
 
         if (stack_4k_ptr < SZ_4_UDF)
             flags.refill_4 = 1;
@@ -168,8 +167,8 @@ int pfa_pf_alloc(PF_Size sz, pg_num_4k_t* ptr)
         case PF_16K:
         if (!stack_16k_ptr)
             fetch_pg_16k((pg_num_16k_t*)ptr);
-        else
-            *ptr = stack_pg_16k[--stack_16k_ptr];
+        
+        *ptr = stack_pg_16k[--stack_16k_ptr];
         
         if (stack_16k_ptr < SZ_16_UDF)
             flags.refill_16 = 1;
@@ -278,6 +277,20 @@ static void stack_16k_init()
             panic("Ran out of 16k regions in stack init.");
         }
     }
+}
+
+size_t pfa_memstat()
+{
+    size_t free_mem = (stack_4k_ptr * PG_SIZE) + (stack_16k_ptr * 4 * PG_SIZE);
+    for (size_t i = 0; i < reservoir_size; i++) {
+        uint8_t probe = 1;
+        uint8_t cur = pg_reservoir[i];
+        do {
+            if (probe & cur)
+                free_mem += PG_SIZE;
+        } while (probe <<= 1);
+    }
+    return free_mem;
 }
 
 //Initializes the Page Frame Allocator. This system is
